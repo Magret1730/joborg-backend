@@ -1,24 +1,7 @@
-import express, { Request, Response } from "express";
-import cors from "cors";
 import dotenv from "dotenv";
+import app from "./app.js";
 
 dotenv.config();
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("Joborg backend API is running");
-});
-
-app.get("/api/health", (req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: "Server is healthy",
-  });
-});
 
 const PORT = process.env.PORT || 5000;
 
