@@ -1,11 +1,12 @@
-// import createDbConnection from "knex";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import { validateRegisterRequest } from "../utils/validations/validate-register-request.js";
-// import { sendMail } from "../utils/mailer.js";
+import { validateLoginRequest } from "../utils/validations/validate-login-request.js";
+import { sendMail } from "../utils/mailer.js";
 import db from "../db/connection.js";
+import { validateEmail } from "../utils/validations/validate-email.js";
 
 const register = async (req: Request, res: Response) => {
     try {
@@ -45,7 +46,8 @@ const register = async (req: Request, res: Response) => {
                 password: encryptedPwd,
                 is_admin: false,
             })
-            .returning(["id", "first_name", "last_name", "email", "is_admin"]);
+            .returning(["id"]);
+            // .returning(["id", "first_name", "last_name", "email", "is_admin"]);
         
         if (!newUser) {
             return res.status(500).json({ error: "User registration failed" });
@@ -87,4 +89,189 @@ const register = async (req: Request, res: Response) => {
     }
 };
 
-export { register };
+const login = async (req: Request, res: Response) => {
+    try {
+        // gets the body request
+        const { email, password } = req.body;
+
+        // Basic checks for empty fields
+        if (!email || !password) {
+            return res.status(400).json({ error: 'All fields are compulsory' });
+        }
+
+        // Validate the request body
+        const validationError = validateLoginRequest(req.body);
+        if (validationError) {
+            return res.status(400).json({ message: validationError });
+        }
+
+        // validates existing email
+        const existingUser = await db("users").where({ email }).first();
+        if (!existingUser) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        // compares the password with the encrypted password in the database
+        const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) {
+            throw new Error("JWT_SECRET is not defined in environment variables");
+        }
+
+        // Create token for the user
+        const token = jwt.sign(
+            { id: existingUser.id, 
+                email: existingUser.email,
+                is_admin:existingUser.is_admin },
+            jwtSecret,
+            { expiresIn: '15m' }
+        );
+
+        // Updates user record with the token
+        await db("users").where({ id: existingUser.id }).update({ token });
+
+        // Removes the password field from the response
+        delete existingUser.password;
+
+        // Returns data and status to frontend
+        res.status(201).json({
+                            success: true,
+                            data: {
+                                token,
+                                id: existingUser.id,
+                                email: existingUser.email,
+                                is_admin: existingUser.is_admin
+                        }
+        });
+    } catch (error) {
+        console.error("Login error:", error);
+        res.status(500).json({ error: "Login error, something went wrong" });
+    }
+}
+
+// Function to get link in email
+const forgotPassword = async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    try {
+        if (!(email)) {
+            return res.status(400).json({ error: 'Email is required' });
+        };
+
+        // Validate the request body
+        const validationError = validateEmail(req.body);
+        if (validationError) {
+            return res.status(400).json({ message: validationError });
+        }
+
+        // find user in db
+        const existingUser = await db("users").where({ email }).first();
+
+        // respond if no existing user
+        if (!existingUser) {
+            return res.status(400).json({ error: "User not found" });
+        }
+
+        const forgotPasswordKey = process.env.FORGOT_PASSWORD_KEY;
+        if (!forgotPasswordKey) {
+            throw new Error("FORGOT_PASSWORD_KEY is not defined in environment variables");
+        }
+
+        // Generate a new token
+        const token = jwt.sign(
+            { id: existingUser.id},
+            forgotPasswordKey,
+            { expiresIn: '15m' }
+        );
+
+        // Update the user's token in the database
+        await db("users").where({ id: existingUser.id }).update({ token: "" });
+
+        // Send the email
+        const sendEmail = await sendMail({
+            to: email,
+            subject: 'Joborg Password Reset',
+            html: `
+                    <h2>Click the following link to reset your password:</h2>
+                    <h2>The link expires in 15 minutes</h2>
+                    <p>${process.env.FRONTEND_URL}/resetPassword/${token}</p>
+
+                    <p>If you did not request this, please ignore this email.</p>
+                    <p>Thank you!</p>
+                    <p>Joborg Team</p>
+                `,
+        });
+
+        if (sendEmail) {
+            return res.status(200).json({ message: 'Email has been sent, kindly follow the instructions' });
+        } else {
+            return res.status(500).json({ error: 'Failed to send email' });
+        }
+
+    } catch (error) { 
+        if (error instanceof Error) {
+            console.error('Error in forgotPassword:', error.message);
+        } else {
+            console.error('Error in forgotPassword:', error);
+        }
+        return res.status(500).json({ error: error instanceof Error ? error.message : 'An unknown error occurred' });
+    }
+};
+
+// Function to resetPassword
+const resetPassword = async (req: Request, res: Response) => {
+    const { token, newPassword, confirmPassword } = req.body;
+
+    if (!token || !newPassword || !confirmPassword) {
+        return res.status(400).json({ error: 'All fields are required.' });
+    }
+
+    try {
+        const resetPasswordKey = process.env.FORGOT_PASSWORD_KEY;
+        if (!resetPasswordKey) {
+            throw new Error("RESET_PASSWORD_KEY is not defined in environment variables");
+        }
+
+        // verifies token
+        const decoded = jwt.verify(token, resetPasswordKey) as jwt.JwtPayload;
+
+        // find user in db
+        const user = await db("users").where({ id: decoded.id }).first();
+
+        // respond if no user
+        if (!user) {
+            return res.status(400).json({ error: "User does not exist" });
+        }
+
+        // Validate password
+        const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).{4,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            return "Password should contain at least one letter and one number, and be at least 4 characters long";
+        } else if (newPassword !== confirmPassword) {
+            return res.status(400).json({ error: "Passwords do not match" });
+        }
+
+        // Encrypt the new password
+        const salt = await bcrypt.genSalt(10);
+        const encryptedPwd = await bcrypt.hash(newPassword, salt);
+        if (!encryptedPwd) {
+            return res.status(500).json({ message: 'Could not encrypt password' });
+        }
+
+        // Update the user's token in the database
+        await db("users").where({ id: user.id }).update({
+            password: encryptedPwd,
+            token: ''
+        });
+
+        return res.status(200).json({ message: 'Your password has been changed. Please log in with your new password.' });
+    } catch (error) {
+        res.status(401).json({ error: 'Incorrect or expired token. Please request a new one.' });
+    }
+};
+
+export { register, login, forgotPassword, resetPassword };

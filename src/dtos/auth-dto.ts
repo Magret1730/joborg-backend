@@ -5,6 +5,21 @@ export type RegisterRequestDto = {
     password: string;
 };
 
+export type LoginRequestDto = {
+    email: string;
+    password: string;
+};
+
+export type EmailDto = {
+    email: string;
+};
+
+export type sendMailDto = {
+    to: string;
+    subject: string;
+    html: string;
+};
+
 // export type AuthUserDto = {
 //     id: string;
 //     first_name: string;
@@ -19,7 +34,3 @@ export type RegisterRequestDto = {
 //     user: AuthUserDto;
 // };
 
-// export type ErrorResponseDto = {
-//     success: false;
-//     message: string;
-// };
