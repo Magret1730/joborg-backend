@@ -5,6 +5,10 @@ export type PageFetchResult = {
     error?: string;
   };
 
+// Fetches the HTML content of a page given its URL.
+// It includes error handling for various scenarios such as timeouts,
+// non-HTML content, and empty responses. The function returns a structured
+// result indicating success or failure along with relevant details.
 export async function fetchPageHtml(url: string): Promise<PageFetchResult> {
   // Sets up an abort controller to handle timeouts
 	// because some websites may hang or take too long to respond.
