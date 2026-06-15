@@ -1,9 +1,9 @@
 import express from 'express';
-import * as userController from '../controllers/user.controller.js';
+import * as trackerController from '../controllers/tracker.controller.js';
 import { authorization } from '../middlewares/authorization.js';
 
 const router = express.Router();
 
-router.route("/me/:id").get(authorization, userController.me);
+router.route("/").post(authorization, trackerController.postTracker);
 
 export default router;
