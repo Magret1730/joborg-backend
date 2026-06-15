@@ -293,3 +293,38 @@ export const pauseTracker = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const resumeTracker = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Tracker ID is required.",
+      });
+    }
+
+    const updated = await db("trackers")
+      .where({ id, user_id: req.user.id })
+      .update({ status: "ACTIVE" });
+
+    if (updated === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Tracker not found or not owned by user.",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: updated,
+      message: "Tracker resumed successfully.",
+    });
+  } catch (error) {
+    console.error("Error resuming tracker:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while resuming tracker",
+    });
+  }
+};
