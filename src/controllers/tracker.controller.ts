@@ -100,3 +100,73 @@ export const postTracker = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const getTrackers = async (req: Request, res: Response) => {
+    try {
+        const trackers = await db("trackers")
+            .where({ user_id: req.user.id })
+            .select(
+                "id",
+                "company_name",
+                "label",
+                "url",
+                "status",
+                "last_hash",
+                "last_checked_at",
+                "last_changed_at"
+            );
+
+        if (!trackers) {
+            return res.status(404).json({
+                success: false,
+                message: "No trackers found for this user.",
+            });
+        }
+
+        res.json({
+            success: true,
+            data: trackers,
+        });
+    } catch (error) {
+        console.error("Error fetching trackers:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error while fetching trackers",
+        });
+    }
+};
+
+export const deleteTracker = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                message: "Tracker ID is required.",
+            });
+        }
+
+        const deleted = await db("trackers")
+            .where({ id, user_id: req.user.id })
+            .del();
+
+        if (deleted === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Tracker not found or not owned by user.",
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Tracker deleted successfully.",
+        });
+    } catch (error) {
+        console.error("Error deleting tracker:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error while deleting tracker",
+        });
+    }
+};
+
