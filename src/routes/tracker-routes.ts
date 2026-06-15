@@ -9,5 +9,6 @@ router.route("/").get(authorization, trackerController.getTrackers);
 router.route("/:id").get(authorization, trackerController.getTracker);
 router.route("/:id").put(authorization, trackerController.updateTracker);
 router.route("/").delete(authorization, trackerController.deleteTracker);
+router.route("/:id/pause").post(authorization, trackerController.pauseTracker);
 
 export default router;

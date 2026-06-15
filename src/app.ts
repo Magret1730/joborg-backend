@@ -30,7 +30,7 @@ app.use("/", express.static("public/images"));
 // All Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
-app.use("/api/v1/tracker", trackerRoutes);
+app.use("/api/v1/trackers", trackerRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Joborg backend API is running");
