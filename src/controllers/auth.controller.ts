@@ -128,7 +128,7 @@ const login = async (req: Request, res: Response) => {
                 is_admin:existingUser.is_admin
             },
             jwtSecret,
-            { expiresIn: '15m' }
+            { expiresIn: '30d' }
         );
 
         // Updates user record with the token
