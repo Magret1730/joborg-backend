@@ -4,9 +4,12 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable("users", (table) => {
     table.uuid("id").primary().defaultTo(knex.raw("gen_random_uuid()"));
 
-    table.string("name").notNullable();
+    table.string("first_name").notNullable();
+    table.string("last_name").notNullable();
     table.string("email").notNullable().unique();
     table.string("password").notNullable();
+    table.string('token', 255).nullable();
+    table.boolean('is_admin').defaultTo(false);
     
     table.timestamps(true, true);
   });
