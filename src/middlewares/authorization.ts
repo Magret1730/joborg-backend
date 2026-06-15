@@ -1,15 +1,6 @@
 import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
-
-export type AuthPayload = {
-  id: string;
-  email: string;
-  is_admin?: boolean;
-};
-
-export type AuthRequest = Request & {
-  user?: AuthPayload;
-};
+import { AuthPayload, AuthRequest } from "../dtos/auth-dto.js";
 
 export const authorization = async (
   req: AuthRequest,
