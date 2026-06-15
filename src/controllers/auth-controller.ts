@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
@@ -70,7 +69,7 @@ const register = async (req: Request, res: Response) => {
         );
 
         // Updates user record with the token
-        await db("users").where({ id: newUser.id }).update({ token });
+        // await db("users").where({ id: newUser.id }).update({ token });
 
         // Removes the password field from the response
         delete newUser.password;
@@ -81,8 +80,9 @@ const register = async (req: Request, res: Response) => {
                                                         first_name: newUser.first_name,
                                                         last_name: newUser.last_name,
                                                         email: newUser.email,
-                                                        is_admin: newUser.is_admin }
-        });
+                                                        is_admin: newUser.is_admin
+                                                    }
+                            });
     } catch (error) {
         console.error("Registration error:", error);
         res.status(500).json({ error: "Registration error, something went wrong" });
@@ -132,7 +132,7 @@ const login = async (req: Request, res: Response) => {
         );
 
         // Updates user record with the token
-        await db("users").where({ id: existingUser.id }).update({ token });
+        // await db("users").where({ id: existingUser.id }).update({ token });
 
         // Removes the password field from the response
         delete existingUser.password;
@@ -143,10 +143,12 @@ const login = async (req: Request, res: Response) => {
                             data: {
                                 token,
                                 id: existingUser.id,
+                                first_name: existingUser.first_name,
+                                last_name: existingUser.last_name,
                                 email: existingUser.email,
                                 is_admin: existingUser.is_admin
-                        }
-        });
+                            }
+            });
     } catch (error) {
         console.error("Login error:", error);
         res.status(500).json({ error: "Login error, something went wrong" });

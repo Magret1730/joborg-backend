@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth-routes.js";
+import userRoutes from "./routes/user-routes.js";
 
 const allowedOrigins = ["http://localhost:5173"];
 
@@ -27,6 +28,7 @@ app.use("/", express.static("public/images"));
 
 // All Routes
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user", userRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Joborg backend API is running");

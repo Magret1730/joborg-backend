@@ -1,3 +1,5 @@
+import type { Request, Response, NextFunction } from "express";
+
 export type RegisterRequestDto = {
     first_name: string;
     last_name: string;
@@ -20,17 +22,12 @@ export type sendMailDto = {
     html: string;
 };
 
-// export type AuthUserDto = {
-//     id: string;
-//     first_name: string;
-//     last_name: string;
-//     email: string;
-// };
-
-// export type AuthResponseDto = {
-//     success: true;
-//     message: string;
-//     token: string;
-//     user: AuthUserDto;
-// };
-
+export type AuthPayload = {
+    id: string;
+    email: string;
+    is_admin?: boolean;
+  };
+  
+  export type AuthRequest = Request & {
+    user?: AuthPayload;
+  };
