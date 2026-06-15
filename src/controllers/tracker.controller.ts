@@ -181,3 +181,48 @@ export const getTracker = async (req: Request, res: Response) => {
 };
 
 
+
+export const updateTracker = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { url, label, company_name } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Tracker ID is required.",
+      });
+    }
+
+    const updateData: TrackerRequestDto = {};
+    if (url) updateData.url = url;
+    if (label) updateData.label = label;
+    if (company_name) updateData.company_name = company_name;
+
+    const updated = await db("trackers")
+      .where({ id, user_id: req.user.id })
+      .update(updateData);
+
+    if (updated === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Tracker not found or not owned by user.",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        id,
+        ...updateData,
+      },
+      message: "Tracker updated successfully.",
+    });
+  } catch (error) {
+    console.error("Error updating tracker:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating tracker",
+    });
+  }
+};
