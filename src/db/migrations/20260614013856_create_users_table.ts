@@ -7,7 +7,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string("first_name").notNullable();
     table.string("last_name").notNullable();
     table.string("email").notNullable().unique();
-    table.string("password").notNullable();
+    table.string("password_hash").notNullable();
     table.boolean('is_admin').defaultTo(false);
     
     table.timestamps(true, true);

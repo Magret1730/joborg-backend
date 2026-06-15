@@ -42,7 +42,7 @@ const register = async (req: Request, res: Response) => {
                 first_name: first_name.toLowerCase(),
                 last_name: last_name.toLowerCase(),
                 email: email.toLowerCase(),
-                password: encryptedPwd,
+                password_hash: encryptedPwd,
                 is_admin: false,
             })
             .returning(["id"]);
@@ -58,12 +58,11 @@ const register = async (req: Request, res: Response) => {
         }
 
         // Create token for the user
-        const token = jwt.sign(
-            { id: newUser.id, 
+        const token = jwt.sign({
+                id: newUser.id, 
                 email: newUser.email,
-                // first_name: newUser.first_name,
-                // last_name: newUser.last_name,
-                is_admin: newUser.is_admin },
+                is_admin: newUser.is_admin
+            },
             jwtSecret,
             { expiresIn: '15m' }
         );
@@ -112,7 +111,7 @@ const login = async (req: Request, res: Response) => {
         }
 
         // compares the password with the encrypted password in the database
-        const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+        const isPasswordValid = await bcrypt.compare(password, existingUser.password_hash);
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
@@ -123,10 +122,11 @@ const login = async (req: Request, res: Response) => {
         }
 
         // Create token for the user
-        const token = jwt.sign(
-            { id: existingUser.id, 
+        const token = jwt.sign({
+                id: existingUser.id, 
                 email: existingUser.email,
-                is_admin:existingUser.is_admin },
+                is_admin:existingUser.is_admin
+            },
             jwtSecret,
             { expiresIn: '15m' }
         );
@@ -135,7 +135,7 @@ const login = async (req: Request, res: Response) => {
         // await db("users").where({ id: existingUser.id }).update({ token });
 
         // Removes the password field from the response
-        delete existingUser.password;
+        delete existingUser.password_hash;
 
         // Returns data and status to frontend
         res.status(201).json({
@@ -191,7 +191,7 @@ const forgotPassword = async (req: Request, res: Response) => {
         );
 
         // Update the user's token in the database
-        await db("users").where({ id: existingUser.id }).update({ token: "" });
+        // await db("users").where({ id: existingUser.id }).update({ token: "" });
 
         // Send the email
         const sendEmail = await sendMail({
@@ -266,8 +266,8 @@ const resetPassword = async (req: Request, res: Response) => {
 
         // Update the user's token in the database
         await db("users").where({ id: user.id }).update({
-            password: encryptedPwd,
-            token: ''
+            password_hash: encryptedPwd,
+            // token: ''
         });
 
         return res.status(200).json({ message: 'Your password has been changed. Please log in with your new password.' });

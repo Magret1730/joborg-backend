@@ -54,7 +54,7 @@ const me = async (req: Request, res: Response) => {
         }
 
         // Removes the password field from the responsee
-        const { password, ...userData } = user;
+        const { password_hash, ...userData } = user;
 
          // sends a response with the appropriate status code
         res.json({ success: true, data: userData });
