@@ -1,4 +1,4 @@
-import type { RegisterRequestDto } from "../../dtos/auth-dto.js";
+import type { RegisterRequestDto } from "../../dtos/auth.dto.js";
 
 export const validateRegisterRequest = (
   body: RegisterRequestDto

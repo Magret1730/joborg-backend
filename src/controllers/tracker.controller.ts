@@ -5,7 +5,10 @@ import { createHash } from "../services/hash-html.service.js";
 import { cleanHtml } from "../services/html-cleaning.service.js";
 import { fetchPageHtml } from "../services/page-fetch.service.js";
 import { validateUrl } from "../services/url-validation.service.js";
-import type { TrackerRequestDto } from "../dtos/tracker-dto.js";
+import type { TrackerRequestDto } from "../dtos/tracker.dto.js";
+import { checkTrackerForChanges } from "../services/tracker-change.service.js";
+import { sendMail } from "../utils/mailer.js";
+import { trackerChangeEmailTemplate } from "../utils/email-templates/tracker-email-template.js";
 
 export const postTracker = async (req: Request, res: Response) => {
   try {
@@ -147,6 +150,7 @@ export const getTracker = async (req: Request, res: Response) => {
       });
     }
 
+    // Ensure the tracker belongs to the authenticated user
     const tracker = await db("trackers")
       .where({ id, user_id: req.user.id })
       .first(
@@ -255,6 +259,140 @@ export const updateTracker = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Server error while updating tracker",
+    });
+  }
+};
+
+export const pauseTracker = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Tracker ID is required.",
+      });
+    }
+
+    const updated = await db("trackers")
+      .where({ id, user_id: req.user.id })
+      .update({ status: "PAUSED" });
+
+    if (updated === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Tracker not found or not owned by user.",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Tracker paused successfully.",
+    });
+  } catch (error) {
+    console.error("Error pausing tracker:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while pausing tracker",
+    });
+  }
+};
+
+export const resumeTracker = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Tracker ID is required.",
+      });
+    }
+
+    const updated = await db("trackers")
+      .where({ id, user_id: req.user.id })
+      .update({ status: "ACTIVE" });
+
+    if (updated === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Tracker not found or not owned by user.",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: updated,
+      message: "Tracker resumed successfully.",
+    });
+  } catch (error) {
+    console.error("Error resuming tracker:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while resuming tracker",
+    });
+  }
+};
+
+export const checkNowTracker = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Tracker ID is required.",
+      });
+    }
+
+    // Ensure the tracker belongs to the authenticated user
+    const tracker = await db("trackers")
+      .where({ id, user_id: req.user.id })
+      .first(
+        "id",
+        "company_name",
+        "label",
+        "url",
+        "status",
+        "last_hash",
+        "last_checked_at",
+        "last_changed_at"
+      );
+
+    if (!tracker) {
+      return res.status(404).json({
+        success: false,
+        message: "Tracker not found for this user.",
+      });
+    }
+
+    // Tracker check service
+    const checkResult = await checkTrackerForChanges(
+      Array.isArray(id) ? id[0] : id
+    );
+    if (!checkResult.success) {
+      return res.status(400).json({
+        success: false,
+        message: checkResult.message,
+      });
+    }
+
+    // If changed, send email notification
+    if (checkResult.changed) {
+      await sendMail({
+        to: req.user.email,
+        subject: `Change detected on ${tracker.company_name} Careers page`,
+        html: await trackerChangeEmailTemplate(tracker, req),
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Tracker checked for changes successfully.",
+      data: checkResult,
+    });
+  } catch (error) {
+    console.error("Error checking tracker:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while checking tracker",
     });
   }
 };
