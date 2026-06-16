@@ -1,5 +1,5 @@
 // A middleware function that checks if the authenticated user is an admin.
-import { AuthPayload, AuthRequest } from "../dtos/auth-dto.js";
+import { AuthPayload, AuthRequest } from "../dtos/auth.dto.js";
 import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
 

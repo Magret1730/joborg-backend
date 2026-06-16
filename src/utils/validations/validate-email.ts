@@ -1,4 +1,4 @@
-import type { EmailDto } from "../../dtos/auth-dto.js";
+import type { EmailDto } from "../../dtos/auth.dto.js";
 
 export const validateEmail = (
   body: EmailDto

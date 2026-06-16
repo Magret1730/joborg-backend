@@ -5,7 +5,7 @@ import { createHash } from "../services/hash-html.service.js";
 import { cleanHtml } from "../services/html-cleaning.service.js";
 import { fetchPageHtml } from "../services/page-fetch.service.js";
 import { validateUrl } from "../services/url-validation.service.js";
-import type { TrackerRequestDto } from "../dtos/tracker-dto.js";
+import type { TrackerRequestDto } from "../dtos/tracker.dto.js";
 import { checkTrackerForChanges } from "../services/tracker-change.service.js";
 import { sendMail } from "../utils/mailer.js";
 
@@ -363,7 +363,9 @@ export const checkNowTracker = async (req: Request, res: Response) => {
     }
 
     // Tracker check service
-    const checkResult = await checkTrackerForChanges(Array.isArray(id) ? id[0] : id);
+    const checkResult = await checkTrackerForChanges(
+      Array.isArray(id) ? id[0] : id
+    );
     if (!checkResult.success) {
       return res.status(400).json({
         success: false,

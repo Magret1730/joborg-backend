@@ -1,4 +1,4 @@
-import type { LoginRequestDto } from "../../dtos/auth-dto.js";
+import type { LoginRequestDto } from "../../dtos/auth.dto.js";
 
 export const validateLoginRequest = (
   body: LoginRequestDto
