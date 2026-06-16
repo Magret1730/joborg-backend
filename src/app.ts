@@ -3,6 +3,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import trackerRoutes from "./routes/tracker.routes.js";
+import changeLogsRoutes from "./routes/change-logs.routes.js";
 
 const allowedOrigins = ["http://localhost:5173"];
 
@@ -31,7 +32,7 @@ app.use("/", express.static("public/images"));
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/trackers", trackerRoutes);
-app.use("/api/v1/change-logs", trackerRoutes);
+app.use("/api/v1/change-logs", changeLogsRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Joborg backend API is running");

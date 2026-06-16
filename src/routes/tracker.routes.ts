@@ -10,7 +10,7 @@ router.route("/").post(authorization, manualTrackerCheckLimiter, trackerControll
 router.route("/").get(authorization, trackerController.getTrackers);
 router.route("/:id").get(authorization, trackerController.getTracker);
 router.route("/:id").put(authorization, trackerController.updateTracker);
-router.route("/").delete(authorization, trackerController.deleteTracker);
+router.route("/:id").delete(authorization, trackerController.deleteTracker);
 router.route("/:id/pause").patch(authorization, trackerController.pauseTracker);
 router.route("/:id/resume").patch(authorization, trackerController.resumeTracker);
 router.route("/:id/check-now").post(authorization, manualTrackerCheckLimiter, trackerController.checkNowTracker);
