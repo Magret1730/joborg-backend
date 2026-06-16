@@ -285,7 +285,6 @@ export const pauseTracker = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      data: updated,
       message: "Tracker paused successfully.",
     });
   } catch (error) {
@@ -380,9 +379,9 @@ export const checkNowTracker = async (req: Request, res: Response) => {
         html: `
           <p>Dear ${req.user.first_name},</p>
           <p>A change has been detected on the page you are tracking:</p>
-          <p><strong>${tracker.company_name}</strong></p>
-          <p><strong>${tracker.label}</strong></p>
-          <p><a href="${tracker.url}" target="_blank">${tracker.url}</a></p>
+          <p>Company Name: <strong>${tracker.company_name}</strong></p>
+          <p>Company Label: <strong>${tracker.label}</strong></p>
+          <p>Company URL: <a href="${tracker.url}" target="_blank">${tracker.url}</a></p>
           <p>Please visit the tracker dashboard to see the details of the change.</p>
           <p>Best regards,<br/>Joborg Team</p>
         `,

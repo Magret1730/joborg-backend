@@ -13,6 +13,9 @@ type TrackerCheckResult = {
   changeLog?: unknown;
 };
 
+// To prevent excessive checks and reduce load on the target websites, we can implement a cooldown mechanism.
+const CHECK_COOLDOWN_MINUTES = 5;
+
 export const checkTrackerForChanges = async (
   trackerId: string
 ): Promise<TrackerCheckResult> => {
@@ -26,6 +29,28 @@ export const checkTrackerForChanges = async (
       success: false,
       message: "Tracker not found.",
     };
+  }
+
+  // Rate limit: prevent checking the same tracker too frequently
+  if (tracker.last_checked_at) {
+    const lastCheckedAt = new Date(tracker.last_checked_at);
+    const now = new Date();
+
+    const minutesSinceLastCheck =
+      (now.getTime() - lastCheckedAt.getTime()) / (1000 * 60);
+
+    if (minutesSinceLastCheck < CHECK_COOLDOWN_MINUTES) {
+      const minutesRemaining = Math.ceil(
+        CHECK_COOLDOWN_MINUTES - minutesSinceLastCheck
+      );
+
+      return {
+        success: false,
+        changed: false,
+        trackerId: tracker.id,
+        message: `This tracker was checked recently. Please try again in ${minutesRemaining} minute(s).`,
+      };
+    }
   }
 
   // Fetch the current HTML content of the tracker's URL.
@@ -85,7 +110,7 @@ export const checkTrackerForChanges = async (
       tracker_id: tracker.id,
       old_hash: tracker.last_hash,
       new_hash: newHash,
-      changed_at: now,
+      detected_at: now,
     })
     .returning("*");
 
