@@ -8,6 +8,7 @@ import { validateUrl } from "../services/url-validation.service.js";
 import type { TrackerRequestDto } from "../dtos/tracker.dto.js";
 import { checkTrackerForChanges } from "../services/tracker-change.service.js";
 import { sendMail } from "../utils/mailer.js";
+import { trackerChangeEmailTemplate } from "../utils/email-templates/tracker-email-template.js";
 
 export const postTracker = async (req: Request, res: Response) => {
   try {
@@ -377,16 +378,8 @@ export const checkNowTracker = async (req: Request, res: Response) => {
     if (checkResult.changed) {
       await sendMail({
         to: req.user.email,
-        subject: `Change detected for ${tracker.label || tracker.url}`,
-        html: `
-          <p>Dear ${req.user.first_name},</p>
-          <p>A change has been detected on the page you are tracking:</p>
-          <p>Company Name: <strong>${tracker.company_name}</strong></p>
-          <p>Company Label: <strong>${tracker.label}</strong></p>
-          <p>Company URL: <a href="${tracker.url}" target="_blank">${tracker.url}</a></p>
-          <p>Please visit the tracker dashboard to see the details of the change.</p>
-          <p>Best regards,<br/>Joborg Team</p>
-        `,
+        subject: `Change detected on ${tracker.company_name} Careers page`,
+        html: await trackerChangeEmailTemplate(tracker, req),
       });
     }
 
