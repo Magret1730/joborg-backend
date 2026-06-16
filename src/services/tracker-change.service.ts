@@ -39,6 +39,8 @@ export const checkTrackerForChanges = async (
     const minutesSinceLastCheck =
       (now.getTime() - lastCheckedAt.getTime()) / (1000 * 60);
 
+    // If the last check was performed within the cooldown period,
+    // we return a message indicating that the user should wait before checking again.
     if (minutesSinceLastCheck < CHECK_COOLDOWN_MINUTES) {
       const minutesRemaining = Math.ceil(
         CHECK_COOLDOWN_MINUTES - minutesSinceLastCheck
