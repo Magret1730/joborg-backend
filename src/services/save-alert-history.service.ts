@@ -22,9 +22,5 @@ export const saveAlertHistory = async ({
     })
     .returning("*");
 
-    if (!alertHistory) {
-      throw new Error("Failed to save alert history");
-    }
-
   return alertHistory;
 };
