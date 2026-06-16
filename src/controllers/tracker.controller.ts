@@ -379,7 +379,7 @@ export const checkNowTracker = async (req: Request, res: Response) => {
       await sendMail({
         to: req.user.email,
         subject: `Change detected on ${tracker.company_name} Careers page`,
-        html: await trackerChangeEmailTemplate(tracker, req),
+        html: await trackerChangeEmailTemplate(tracker),
       });
     }
 
