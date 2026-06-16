@@ -1,9 +1,9 @@
 import { Request } from "express";
 import type { TrackerRequestDto } from "../../dtos/tracker.dto.js";
 
-export const trackerChangeEmailTemplate = async (tracker: TrackerRequestDto, req: Request) => {
+export const trackerChangeEmailTemplate = async (tracker: TrackerRequestDto) => {
+  // <p>Hi ${req.user.first_name},</p>
   return `
-    <p>Hi ${req.user.first_name},</p>
     <p>We detected a change on the career page you are tracking:</p>
     <p>Company Name: <strong>${tracker.company_name}</strong></p>
     <p>Company Label: <strong>${tracker.label}</strong></p>
