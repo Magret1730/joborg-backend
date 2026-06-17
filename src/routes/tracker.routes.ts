@@ -13,6 +13,6 @@ router.route("/:id").put(authorization, trackerController.updateTracker);
 router.route("/:id").delete(authorization, trackerController.deleteTracker);
 router.route("/:id/pause").patch(authorization, trackerController.pauseTracker);
 router.route("/:id/resume").patch(authorization, trackerController.resumeTracker);
-router.route("/:id/check-now").post(authorization, manualTrackerCheckLimiter, trackerController.checkNowTrackerByID);
+router.route("/:id/check-now").get(authorization, manualTrackerCheckLimiter, trackerController.checkNowTrackerByID);
 
 export default router;

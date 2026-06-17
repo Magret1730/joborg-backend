@@ -32,28 +32,28 @@ export const checkTrackerForChanges = async (
   }
 
   // Rate limit: prevent checking the same tracker too frequently
-  if (tracker.last_checked_at) {
-    const lastCheckedAt = new Date(tracker.last_checked_at);
-    const now = new Date();
+  // if (tracker.last_checked_at) {
+  //   const lastCheckedAt = new Date(tracker.last_checked_at);
+  //   const now = new Date();
 
-    const minutesSinceLastCheck =
-      (now.getTime() - lastCheckedAt.getTime()) / (1000 * 60);
+  //   const minutesSinceLastCheck =
+  //     (now.getTime() - lastCheckedAt.getTime()) / (1000 * 60);
 
-    // If the last check was performed within the cooldown period,
-    // we return a message indicating that the user should wait before checking again.
-    if (minutesSinceLastCheck < CHECK_COOLDOWN_MINUTES) {
-      const minutesRemaining = Math.ceil(
-        CHECK_COOLDOWN_MINUTES - minutesSinceLastCheck
-      );
+  //   // If the last check was performed within the cooldown period,
+  //   // we return a message indicating that the user should wait before checking again.
+  //   if (minutesSinceLastCheck < CHECK_COOLDOWN_MINUTES) {
+  //     const minutesRemaining = Math.ceil(
+  //       CHECK_COOLDOWN_MINUTES - minutesSinceLastCheck
+  //     );
 
-      return {
-        success: false,
-        changed: false,
-        trackerId: tracker.id,
-        message: `This tracker was checked recently. Please try again in ${minutesRemaining} minute(s).`,
-      };
-    }
-  }
+  //     return {
+  //       success: false,
+  //       changed: false,
+  //       trackerId: tracker.id,
+  //       message: `This tracker was checked recently. Please try again in ${minutesRemaining} minute(s).`,
+  //     };
+  //   }
+  // }
 
   // Fetch the current HTML content of the tracker's URL.
   const fetchResult = await fetchPageHtml(tracker.url);

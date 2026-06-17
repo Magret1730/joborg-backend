@@ -398,6 +398,7 @@ export const checkNowTrackerByID = async (req: Request, res: Response) => {
   }
 };
 
+// Will not implement this in frontend
 export const checkNowAllTrackers = async (req: Request, res: Response) => {
   const result = await checkAllActiveTrackers();
 

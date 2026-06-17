@@ -85,12 +85,6 @@ export const checkAllActiveTrackers = async () => {
 
       const changeLog = checkResult.changeLog as { id: string };
 
-      // const emailHtml = trackerChangeEmailTemplate({
-      //   companyName: tracker.company_name,
-      //   label: tracker.label,
-      //   url: tracker.url,
-      // });
-
       try {
         await sendMail({
           to: tracker.user_email,
