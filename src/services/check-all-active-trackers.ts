@@ -1,5 +1,5 @@
 import db from "../db/connection.js";
-import { checkTrackerForChanges } from "./tracker-change.service.js";
+import { checkTrackerForChanges } from "./check-tracker-for-changes.service.js";
 import { sendMail } from "../utils/mailer.js";
 import { trackerChangeEmailTemplate } from "../utils/email-templates/tracker-email-template.js";
 import { saveAlertHistory } from "./save-alert-history.service.js";

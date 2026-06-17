@@ -1,7 +1,8 @@
 import cron from "node-cron";
 import { checkAllActiveTrackers } from "./check-all-active-trackers.js";
 
-const TRACKER_CHECK_SCHEDULE = "0 */6 * * *";
+const TRACKER_CHECK_SCHEDULE = "*/5 * * * *"; // Every 3 hours // minute hour day-of-month month day-of-week
+// const TRACKER_CHECK_SCHEDULE = "0 */6 * * *";
 
 export const startScheduler = () => {
   const schedulerEnabled = process.env.ENABLE_SCHEDULER === "true";

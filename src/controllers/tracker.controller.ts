@@ -1,14 +1,15 @@
 import db from "../db/connection.js";
 import type { Request, Response } from "express";
 import { detectCareerPage } from "../services/career-page-detection.service.js";
-import { createHash } from "../services/hash-html.service.js";
-import { cleanHtml } from "../services/html-cleaning.service.js";
-import { fetchPageHtml } from "../services/page-fetch.service.js";
+import { createHash } from "../services/create-hash.service.js";
+import { cleanHtml } from "../services/clean-html.service.js";
+import { fetchPageHtml } from "../services/fetch-page-html.service.js";
 import { validateUrl } from "../services/url-validation.service.js";
 import type { TrackerRequestDto } from "../dtos/tracker.dto.js";
-import { checkTrackerForChanges } from "../services/tracker-change.service.js";
+import { checkTrackerForChanges } from "../services/check-tracker-for-changes.service.js";
 import { sendMail } from "../utils/mailer.js";
 import { trackerChangeEmailTemplate } from "../utils/email-templates/tracker-email-template.js";
+import { checkAllActiveTrackers } from "../services/check-all-active-trackers.js";
 
 export const postTracker = async (req: Request, res: Response) => {
   try {
@@ -332,7 +333,7 @@ export const resumeTracker = async (req: Request, res: Response) => {
   }
 };
 
-export const checkNowTracker = async (req: Request, res: Response) => {
+export const checkNowTrackerByID = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) {
@@ -396,3 +397,93 @@ export const checkNowTracker = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const checkNowAllTrackers = async (req: Request, res: Response) => {
+  const result = await checkAllActiveTrackers();
+
+  return res.status(200).json(result);
+  // try{
+  //   // Get all active trackers
+  //   const trackers = await db("trackers")
+  //     .join("users", "trackers.user_id", "users.id")
+  //     .where("trackers.status", "ACTIVE")
+  //     .select(
+  //       "trackers.id",
+  //       "trackers.company_name",
+  //       "trackers.label",
+  //       "trackers.url",
+  //       "trackers.status",
+  //       "users.email as user_email"
+  //     );
+
+  //   if (trackers.length === 0) {
+  //     res.status(200).json({
+  //       success: true,
+  //       message: "No active trackers",
+  //     });
+  //   }
+
+  //   const results = [];
+
+  //   for (const tracker of trackers ) {
+  //     try {
+  //       // Tracker check service
+  //       const checkResult = await checkTrackerForChanges(tracker.id);
+  //       if (!checkResult.success) {
+  //         results.push({
+  //           trackerId: tracker.id,
+  //           companyName: tracker.company_name,
+  //           success: false,
+  //           changed: false,
+  //           message: checkResult.message,
+  //         });
+
+  //         continue;
+  //       }
+
+  //       // If changed, send email notification
+  //       if (checkResult.changed) {
+  //         await sendMail({
+  //           to: req.user.email,
+  //           subject: `Change detected on ${tracker.company_name} Careers page`,
+  //           html: await trackerChangeEmailTemplate(tracker),
+  //         });
+  //       }
+
+  //       results.push({
+  //         trackerId: tracker.id,
+  //         companyName: tracker.company_name,
+  //         success: true,
+  //         changed: checkResult.changed,
+  //         message: checkResult.message,
+  //         data: checkResult,
+  //       });
+  //     } catch (trackerError) {
+  //       console.error(`Error checking tracker ${tracker.id}:`, trackerError);
+
+  //       results.push({
+  //         trackerId: tracker.id,
+  //         companyName: tracker.company_name,
+  //         success: false,
+  //         changed: false,
+  //         message: "Failed to check this tracker.",
+  //       });
+
+  //       continue;
+  //     }
+  //   }
+
+  //   return res.status(200).json({
+  //     success: true,
+  //     message: "All active trackers checked.",
+  //     checked: results.length,
+  //     data: results,
+  //   });
+  // } catch (error) {
+  //   console.error("Error checking all trackers:", error);
+  //   res.status(500).json({
+  //     success: false,
+  //     message: "Server error while checking all trackers",
+  //   });
+  // }
+}

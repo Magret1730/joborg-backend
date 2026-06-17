@@ -1,6 +1,6 @@
-import { fetchPageHtml } from "./page-fetch.service.js";
-import { cleanHtml } from "./html-cleaning.service.js";
-import { createHash } from "./hash-html.service.js";
+import { fetchPageHtml } from "./fetch-page-html.service.js";
+import { cleanHtml } from "./clean-html.service.js";
+import { createHash } from "./create-hash.service.js";
 import db from "../db/connection.js";
 
 type TrackerCheckResult = {
