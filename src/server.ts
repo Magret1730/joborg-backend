@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import app from "./app.js";
-import { startScheduler } from "../src/services/cron-scheduler.service.js"
+import { startScheduler } from "./services/start-scheduler.service.js"
 
 dotenv.config();
 

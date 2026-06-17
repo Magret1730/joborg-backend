@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import { checkAllActiveTrackers } from "./check-all-active-trackers.js";
 
-const TRACKER_CHECK_SCHEDULE = "0 */6 * * *";
+const TRACKER_CHECK_SCHEDULE = "0 */6 * * *"; // Every 6 hours // minute hour day-of-month month day-of-week
 
 export const startScheduler = () => {
   const schedulerEnabled = process.env.ENABLE_SCHEDULER === "true";
@@ -17,5 +17,5 @@ export const startScheduler = () => {
     await checkAllActiveTrackers();
   });
 
-  console.log("Active tracker cron job registered.");
+  console.log("Active trackers cron job registered.");
 };
