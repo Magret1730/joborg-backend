@@ -1,4 +1,5 @@
 export type SaveAlertHistoryInput = {
+  userId: string;
   trackerId: string;
   changeLogId: string;
   recipient: string;
