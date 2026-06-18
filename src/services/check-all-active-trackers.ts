@@ -3,6 +3,9 @@ import { checkTrackerForChanges } from "./check-tracker-for-changes.service.js";
 import { sendMail } from "../utils/mailer.js";
 import { trackerChangeEmailTemplate } from "../utils/email-templates/tracker-email-template.js";
 import { saveAlertHistory } from "./save-alert-history.service.js";
+import { ALERT_STATUS } from "../constants/alert/alertStatus.js";
+import { ALERT_CHANNEL } from "../constants/alert/alertChannel.js";
+import { TRACKER_STATUS } from "../constants/tracker/trackerStatus.js";
 
 type ActiveTrackerRow = {
   id: string;
@@ -21,7 +24,7 @@ export const checkAllActiveTrackers = async () => {
   // single query to minimize database calls
   const activeTrackers = await db("trackers")
     .join("users", "trackers.user_id", "users.id")
-    .where("trackers.status", "ACTIVE")
+    .where("trackers.status", TRACKER_STATUS.ACTIVE)
     .select(
       "trackers.id",
       "trackers.user_id",
@@ -111,8 +114,8 @@ export const checkAllActiveTrackers = async () => {
           changeLogId: changeLog.id,
           recipient: tracker.user_email,
           message: `Change detected on ${tracker.company_name} careers page.`,
-          channel: "email",
-          status: "sent",
+          channel: ALERT_CHANNEL.EMAIL,
+          status: ALERT_STATUS.SENT,
         });
 
         console.log({
@@ -128,8 +131,8 @@ export const checkAllActiveTrackers = async () => {
           changeLogId: changeLog.id,
           recipient: tracker.user_email,
           message: `Failed to send change alert for ${tracker.company_name}.`,
-          channel: "email",
-          status: "failed",
+          channel: ALERT_CHANNEL.EMAIL,
+          status: ALERT_STATUS.FAILED,
           // errorMessage:
           //   emailError instanceof Error ? emailError.message : "Unknown email error",
         });

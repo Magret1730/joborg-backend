@@ -1,5 +1,6 @@
 import db from "../db/connection.js";
 import { SaveAlertHistoryInput } from "../dtos/save-alert-history.dto.js";
+import { ALERT_CHANNEL } from "../constants/alert/alertChannel.js";
 
 export const saveAlertHistory = async ({
   userId,
@@ -7,7 +8,7 @@ export const saveAlertHistory = async ({
   changeLogId,
   recipient,
   message,
-  channel = "email",
+  channel = ALERT_CHANNEL.EMAIL,
   status,
   // errorMessage,
 }: SaveAlertHistoryInput) => {

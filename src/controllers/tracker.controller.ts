@@ -10,6 +10,7 @@ import { checkTrackerForChanges } from "../services/check-tracker-for-changes.se
 import { sendMail } from "../utils/mailer.js";
 import { trackerChangeEmailTemplate } from "../utils/email-templates/tracker-email-template.js";
 import { checkAllActiveTrackers } from "../services/check-all-active-trackers.js";
+import { TRACKER_STATUS } from "../constants/tracker/trackerStatus.js";
 
 export const postTracker = async (req: Request, res: Response) => {
   try {
@@ -276,7 +277,7 @@ export const pauseTracker = async (req: Request, res: Response) => {
 
     const updated = await db("trackers")
       .where({ id, user_id: req.user.id })
-      .update({ status: "PAUSED" });
+      .update({ status: TRACKER_STATUS.PAUSED });
 
     if (updated === 0) {
       return res.status(404).json({
@@ -310,7 +311,7 @@ export const resumeTracker = async (req: Request, res: Response) => {
 
     const updated = await db("trackers")
       .where({ id, user_id: req.user.id })
-      .update({ status: "ACTIVE" });
+      .update({ status: TRACKER_STATUS.ACTIVE });
 
     if (updated === 0) {
       return res.status(404).json({
