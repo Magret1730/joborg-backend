@@ -1,9 +1,9 @@
 export type SaveAlertHistoryInput = {
   trackerId: string;
   changeLogId: string;
-  recipientEmail: string;
+  recipient: string;
   message: string;
   channel?: "email";
   status: "sent" | "failed";
-  errorMessage?: string;
+  // errorMessage?: string;
 };

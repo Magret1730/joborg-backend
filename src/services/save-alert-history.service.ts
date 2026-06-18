@@ -4,21 +4,21 @@ import { SaveAlertHistoryInput } from "../dtos/save-alert-history.dto.js";
 export const saveAlertHistory = async ({
   trackerId,
   changeLogId,
-  recipientEmail,
+  recipient,
   message,
   channel = "email",
   status,
-  errorMessage,
+  // errorMessage,
 }: SaveAlertHistoryInput) => {
   const [alertHistory] = await db("alert_history")
     .insert({
       tracker_id: trackerId,
       change_log_id: changeLogId,
-      recipient_email: recipientEmail,
+      recipient_email: recipient,
       message,
       channel,
       status,
-      error_message: errorMessage || null,
+      // error_message: errorMessage || null,
     })
     .returning("*");
 

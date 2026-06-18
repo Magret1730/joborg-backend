@@ -95,7 +95,7 @@ export const checkAllActiveTrackers = async () => {
         await saveAlertHistory({
           trackerId: tracker.id,
           changeLogId: changeLog.id,
-          recipientEmail: tracker.user_email,
+          recipient: tracker.user_email,
           message: `Change detected on ${tracker.company_name} careers page.`,
           channel: "email",
           status: "sent",
@@ -110,12 +110,12 @@ export const checkAllActiveTrackers = async () => {
         await saveAlertHistory({
           trackerId: tracker.id,
           changeLogId: changeLog.id,
-          recipientEmail: tracker.user_email,
+          recipient: tracker.user_email,
           message: `Failed to send change alert for ${tracker.company_name}.`,
           channel: "email",
           status: "failed",
-          errorMessage:
-            emailError instanceof Error ? emailError.message : "Unknown email error",
+          // errorMessage:
+          //   emailError instanceof Error ? emailError.message : "Unknown email error",
         });
 
         console.error("Email failed for tracker:", tracker.id, emailError);
