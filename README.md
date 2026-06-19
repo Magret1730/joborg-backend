@@ -192,7 +192,7 @@ Authorization: Bearer <token>
 
 - Frontend Repository: [Frontend GitHub Link](https://github.com/Magret1730/joborg-frontend)
 - Backend Repository: [Backend GitHub Link](https://github.com/Magret1730/joborg-backend)
-<!-- - Live Frontend: [Add deployed frontend link here] -->
+- Live Frontend: [Deployment Link](https://joborg-frontend.vercel.app/)
 
 ## Notes
 
