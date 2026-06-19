@@ -1,15 +1,19 @@
+import { SCRAPER_TYPE } from "../../constants/scraper.constants.js";
+
 export type PageFetchResult = {
     success: boolean;
     html?: string;
     statusCode?: number;
     error?: string;
+    scraperUsed?: typeof SCRAPER_TYPE[keyof typeof SCRAPER_TYPE];
   };
 
-// Fetches the HTML content of a page given its URL.
+// Fetches the STATIC HTML content of a page given its URL.
+// It is good for pages where the HTML already contains the jobs.
 // It includes error handling for various scenarios such as timeouts,
 // non-HTML content, and empty responses. The function returns a structured
 // result indicating success or failure along with relevant details.
-export async function fetchPageHtml(url: string): Promise<PageFetchResult> {
+export async function fetchStaticPageHtml(url: string): Promise<PageFetchResult> {
   // Sets up an abort controller to handle timeouts
 	// because some websites may hang or take too long to respond.
   const controller = new AbortController();
@@ -24,9 +28,11 @@ export async function fetchPageHtml(url: string): Promise<PageFetchResult> {
       signal: controller.signal,
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (compatible; joborg-bot/1.0; +https://joborg.app)",
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
         Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-CA,en-US;q=0.9,en;q=0.8",
+        "Cache-Control": "no-cache",
       },
     });
 
@@ -37,6 +43,7 @@ export async function fetchPageHtml(url: string): Promise<PageFetchResult> {
         success: false,
         statusCode: response.status,
         error: `Failed to fetch page. Status code: ${response.status}`,
+        scraperUsed: SCRAPER_TYPE.STATIC,
       };
     }
 
@@ -50,6 +57,7 @@ export async function fetchPageHtml(url: string): Promise<PageFetchResult> {
         success: false,
         statusCode: response.status,
         error: "URL did not return an HTML page.",
+        scraperUsed: SCRAPER_TYPE.STATIC,
       };
     }
 
@@ -62,6 +70,7 @@ export async function fetchPageHtml(url: string): Promise<PageFetchResult> {
         success: false,
         statusCode: response.status,
         error: "Page returned empty HTML content.",
+        scraperUsed: SCRAPER_TYPE.STATIC,
       };
     }
 
@@ -69,6 +78,7 @@ export async function fetchPageHtml(url: string): Promise<PageFetchResult> {
       success: true,
       html,
       statusCode: response.status,
+      scraperUsed: SCRAPER_TYPE.STATIC,
     };
   } catch (error: any) {
     clearTimeout(timeout);
@@ -77,12 +87,14 @@ export async function fetchPageHtml(url: string): Promise<PageFetchResult> {
       return {
         success: false,
         error: "Request timed out while trying to fetch the page.",
+        scraperUsed: SCRAPER_TYPE.STATIC,
       };
     }
 
     return {
       success: false,
       error: "Unable to fetch page. Please check that the URL is reachable.",
+      scraperUsed: SCRAPER_TYPE.STATIC,
     };
   }
 }
