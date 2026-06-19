@@ -1,7 +1,9 @@
-import { fetchPageHtml } from "./fetch-page-html.service.js";
+import { fetchStaticPageHtml } from "./scraper/fetch-static-page-html.service.js";
 import { cleanHtml } from "./clean-html.service.js";
 import { createHash } from "./create-hash.service.js";
 import db from "../db/connection.js";
+import { fetchPageHtml } from "./scraper/fetch-page-html.js";
+import { SCRAPER_TYPE } from "../constants/scraper.constants.js";
 
 type TrackerCheckResult = {
   success: boolean;
@@ -20,9 +22,7 @@ export const checkTrackerForChanges = async (
   trackerId: string
 ): Promise<TrackerCheckResult> => {
   // Fetch the tracker from the database using the provided trackerId.
-  const tracker = await db("trackers")
-    .where({ id: trackerId })
-    .first();
+  const tracker = await db("trackers").where({ id: trackerId }).first();
 
   if (!tracker) {
     return {
@@ -56,13 +56,30 @@ export const checkTrackerForChanges = async (
   // }
 
   // Fetch the current HTML content of the tracker's URL.
-  const fetchResult = await fetchPageHtml(tracker.url);
+  const fetchResult = await fetchPageHtml(
+    tracker.url,
+    tracker.scraper_type || SCRAPER_TYPE.AUTO
+  );
+  // const fetchResult = await fetchStaticPageHtml(tracker.url);
 
   if (!fetchResult.success || !fetchResult.html) {
     return {
       success: false,
       message: fetchResult.error || "Failed to fetch page HTML.",
     };
+  }
+
+  // If the tracker is set to AUTO and the fetch result indicates that the BROWSER scraper was used,
+  // we update the tracker in the database to set the scraper_type to BROWSER for future checks,
+  // as this page likely requires JavaScript rendering.
+  if (
+    tracker.scraper_type === SCRAPER_TYPE.AUTO &&
+    fetchResult.scraperUsed === SCRAPER_TYPE.BROWSER
+  ) {
+    await db("trackers").where({ id: tracker.id }).update({
+      scraper_type: SCRAPER_TYPE.BROWSER,
+      updated_at: new Date(),
+    });
   }
 
   // Clean the fetched HTML content to remove dynamic elements and focus on meaningful changes.
@@ -89,11 +106,9 @@ export const checkTrackerForChanges = async (
 
   // If the new hash matches the last hash stored in the tracker, it means no changes have been detected.
   if (newHash === tracker.last_hash) {
-    await db("trackers")
-      .where({ id: tracker.id })
-      .update({
-        last_checked_at: now,
-      });
+    await db("trackers").where({ id: tracker.id }).update({
+      last_checked_at: now,
+    });
 
     return {
       success: true,
@@ -117,13 +132,11 @@ export const checkTrackerForChanges = async (
     .returning("*");
 
   // Update the tracker with the new hash and timestamps for last checked and last changed.
-  await db("trackers")
-    .where({ id: tracker.id })
-    .update({
-      last_hash: newHash,
-      last_checked_at: now,
-      last_changed_at: now,
-    });
+  await db("trackers").where({ id: tracker.id }).update({
+    last_hash: newHash,
+    last_checked_at: now,
+    last_changed_at: now,
+  });
 
   return {
     success: true,

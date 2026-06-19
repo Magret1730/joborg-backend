@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { detectCareerPage } from "../services/career-page-detection.service.js";
 import { createHash } from "../services/create-hash.service.js";
 import { cleanHtml } from "../services/clean-html.service.js";
-import { fetchPageHtml } from "../services/fetch-page-html.service.js";
+import { fetchStaticPageHtml } from "../services/scraper/fetch-static-page-html.service.js";
 import { validateUrl } from "../services/url-validation.service.js";
 import type { TrackerRequestDto } from "../dtos/tracker.dto.js";
 import { checkTrackerForChanges } from "../services/check-tracker-for-changes.service.js";
@@ -11,10 +11,15 @@ import { sendMail } from "../utils/mailer.js";
 import { trackerChangeEmailTemplate } from "../utils/email-templates/tracker-email-template.js";
 import { checkAllActiveTrackers } from "../services/check-all-active-trackers.js";
 import { TRACKER_STATUS } from "../constants/tracker/trackerStatus.js";
+import { fetchPageHtml } from "../services/scraper/fetch-page-html.js";
+import {
+  SCRAPER_TYPE,
+  type ScraperType,
+} from "../constants/scraper.constants.js";
 
 export const postTracker = async (req: Request, res: Response) => {
   try {
-    const { url, label, company_name } = req.body;
+    const { url, label, company_name, scraper_type } = req.body;
     if (!url) {
       return res.status(400).json({
         success: false,
@@ -31,8 +36,15 @@ export const postTracker = async (req: Request, res: Response) => {
       });
     }
 
+    // Default to AUTO unless the frontend sends STATIC or BROWSER
+    const requestedScraperType: ScraperType =
+      scraper_type && Object.values(SCRAPER_TYPE).includes(scraper_type)
+        ? scraper_type
+        : SCRAPER_TYPE.AUTO;
+
     // Fetch the page HTML
-    const fetchResult = await fetchPageHtml(url);
+    const fetchResult = await fetchPageHtml(url, requestedScraperType);
+    // const fetchResult = await fetchStaticPageHtml(url);
     if (!fetchResult.success) {
       return res.status(400).json({
         success: false,
@@ -76,6 +88,7 @@ export const postTracker = async (req: Request, res: Response) => {
         last_hash: htmlHash,
         last_checked_at: new Date(),
         last_changed_at: new Date(),
+        scraper_type: SCRAPER_TYPE.AUTO,
       })
       .returning([
         "id",
@@ -86,6 +99,7 @@ export const postTracker = async (req: Request, res: Response) => {
         "last_hash",
         "last_checked_at",
         "last_changed_at",
+        "scraper_type",
       ]);
     if (!result || result.length === 0) {
       return res.status(500).json({
@@ -119,7 +133,8 @@ export const getTrackers = async (req: Request, res: Response) => {
         "status",
         "last_hash",
         "last_checked_at",
-        "last_changed_at"
+        "last_changed_at",
+        "scraper_type"
       );
 
     if (!trackers) {
@@ -163,7 +178,8 @@ export const getTracker = async (req: Request, res: Response) => {
         "status",
         "last_hash",
         "last_checked_at",
-        "last_changed_at"
+        "last_changed_at",
+        "scraper_type"
       );
 
     if (!tracker) {
@@ -355,7 +371,8 @@ export const checkNowTrackerByID = async (req: Request, res: Response) => {
         "status",
         "last_hash",
         "last_checked_at",
-        "last_changed_at"
+        "last_changed_at",
+        "scraper_type"
       );
 
     if (!tracker) {
