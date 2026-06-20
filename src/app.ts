@@ -6,7 +6,7 @@ import trackerRoutes from "./routes/tracker.routes.js";
 import changeLogsRoutes from "./routes/change-logs.routes.js";
 import alertsRoutes from "./routes/alerts.routes.js";
 
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = ["http://localhost:3000"];
 
 const app = express();
 
