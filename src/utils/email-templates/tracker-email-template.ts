@@ -1,4 +1,3 @@
-import { Request } from "express";
 import type { TrackerRequestDto } from "../../dtos/tracker.dto.js";
 
 export const trackerChangeEmailTemplate = async (tracker: TrackerRequestDto) => {
