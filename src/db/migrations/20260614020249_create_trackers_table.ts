@@ -20,6 +20,11 @@ export async function up(knex: Knex): Promise<void> {
       .notNullable()
       .defaultTo("ACTIVE");
 
+    table
+      .enu("scraper_type", ["AUTO", "STATIC", "BROWSER"])
+      .notNullable()
+      .defaultTo("AUTO");
+
     table.text("last_hash").nullable();
     table.timestamp("last_checked_at").nullable();
     table.timestamp("last_changed_at").nullable();
