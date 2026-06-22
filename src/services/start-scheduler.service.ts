@@ -2,7 +2,7 @@ import cron from "node-cron";
 import { checkAllActiveTrackers } from "./check-all-active-trackers.js";
 
 const TRACKER_CHECK_SCHEDULE = "0 10,14,19 * * *"; // At hour 10am, 2pm and 7pm // minute hour day-of-month month day-of-week
-const TRACKER_CHECK_SCHEDULE_EVENING = "50 11 * * *"; // At 10:01pm // Testing Purpose
+const TRACKER_CHECK_SCHEDULE_EVENING = "00 05 * * *"; // At 10:01pm // Testing Purpose
 
 export const startScheduler = () => {
   const schedulerEnabled = process.env.ENABLE_SCHEDULER === "true";

@@ -48,7 +48,14 @@ const register = async (req: Request, res: Response) => {
         is_admin: false,
         is_verified: false,
       })
-      .returning(["id", "first_name", "last_name", "email", "is_admin", "is_verified"]);
+      .returning([
+        "id",
+        "first_name",
+        "last_name",
+        "email",
+        "is_admin",
+        "is_verified",
+      ]);
 
     if (!newUser) {
       return res.status(500).json({ error: "User registration failed" });
@@ -126,7 +133,8 @@ const register = async (req: Request, res: Response) => {
     // Returns data and status to frontend
     res.status(201).json({
       success: true,
-      message: "Registration successful. Please check your email to verify your account.",
+      message:
+        "Registration successful. Please check your email to verify your account.",
       data: {
         id: newUser.id,
         first_name: newUser.first_name,
@@ -167,7 +175,8 @@ const login = async (req: Request, res: Response) => {
     // responds if email is not verified
     if (!existingUser.is_verified) {
       return res.status(403).json({
-        message: "Please verify your email before logging in",
+        success: false,
+        message: "Please verify your email before logging in.", // Used in frontend to show resend verification option - DON'T CHANGE THIS MESSAGE
       });
     }
 
@@ -209,11 +218,13 @@ const login = async (req: Request, res: Response) => {
       success: true,
       data: {
         token,
-        id: existingUser.id,
-        first_name: existingUser.first_name,
-        last_name: existingUser.last_name,
-        email: existingUser.email,
-        is_admin: existingUser.is_admin,
+        user: {
+          id: existingUser.id,
+          first_name: existingUser.first_name,
+          last_name: existingUser.last_name,
+          email: existingUser.email,
+          is_admin: existingUser.is_admin,
+        }
       },
     });
   } catch (error) {
@@ -402,57 +413,57 @@ const resetPassword = async (req: Request, res: Response) => {
 
 // Function to resend verification email when user verification link after registration expires
 const resendVerificationEmail = async (req: Request, res: Response) => {
-    try {
-      const { email } = req.body;
-  
-      if (!email) {
-        return res.status(400).json({
-          message: "Email is required",
-        });
-      }
-  
-      const normalizedEmail = email.trim().toLowerCase();
-  
-      const user = await db("users").where({ email: normalizedEmail }).first();
-  
-      // Keep response generic if user does not exist
-      if (!user) {
-        return res.status(200).json({
-          message: "If an account exists, a verification email has been sent.",
-        });
-      }
-  
-      if (user.is_verified) {
-        return res.status(200).json({
-          message: "This account is already verified. You can log in.",
-        });
-      }
-  
-      const jwtSecret = process.env.JWT_SECRET;
-      if (!jwtSecret) {
-        throw new Error("JWT_SECRET is not defined in environment variables");
-      }
-  
-      const frontendUrl = process.env.FRONTEND_URL;
-      if (!frontendUrl) {
-        throw new Error("FRONTEND_URL is not defined in environment variables");
-      }
-  
-      const token = jwt.sign(
-        {
-          id: user.id,
-          email: user.email,
-        },
-        jwtSecret,
-        { expiresIn: "15m" }
-      );
-  
-      const verificationLink = `${frontendUrl}/auth/verify-email?token=${token}`;
-  
-      await sendMail({
-        to: user.email,
-        subject: "Verify your Joborg account",
-        html: `
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        message: "Email is required",
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await db("users").where({ email: normalizedEmail }).first();
+
+    // Keep response generic if user does not exist
+    if (!user) {
+      return res.status(200).json({
+        message: "If an account exists, a verification email has been sent.",
+      });
+    }
+
+    if (user.is_verified) {
+      return res.status(200).json({
+        message: "This account is already verified. You can log in.",
+      });
+    }
+
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET is not defined in environment variables");
+    }
+
+    const frontendUrl = process.env.FRONTEND_URL;
+    if (!frontendUrl) {
+      throw new Error("FRONTEND_URL is not defined in environment variables");
+    }
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      jwtSecret,
+      { expiresIn: "15m" }
+    );
+
+    const verificationLink = `${frontendUrl}/auth/verify-email?token=${token}`;
+
+    await sendMail({
+      to: user.email,
+      subject: "Verify your Joborg account",
+      html: `
           <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
             <h2>Verify your Joborg account</h2>
   
@@ -485,18 +496,25 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
             <p>Thank you,<br />Joborg Team</p>
           </div>
         `,
-      });
-  
-      return res.status(200).json({
-        message: "If an account exists, a verification email has been sent.",
-      });
-    } catch (error) {
-      console.error("Resend verification error:", error);
-  
-      return res.status(500).json({
-        message: "Something went wrong while sending verification email",
-      });
-    }
-  };
+    });
 
-export { register, login, forgotPassword, resetPassword, verifyEmail, resendVerificationEmail };
+    return res.status(200).json({
+      message: "If an account exists, a verification email has been sent.",
+    });
+  } catch (error) {
+    console.error("Resend verification error:", error);
+
+    return res.status(500).json({
+      message: "Something went wrong while sending verification email",
+    });
+  }
+};
+
+export {
+  register,
+  login,
+  forgotPassword,
+  resetPassword,
+  verifyEmail,
+  resendVerificationEmail,
+};

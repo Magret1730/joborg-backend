@@ -4,7 +4,7 @@ import rateLimit from "express-rate-limit";
 // This limiter allows a maximum of 2 manual tracker check requests per IP address within a 1 hour window.
 export const manualTrackerCheckLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour // 60 seconds × 60 minutes × 1000 milliseconds // 2 * 60 * 60 * 1000 - 2 hours
-  max: 5, // max 2 requests per IP within 1 hour
+  max: 2, // max 2 requests per IP within 1 hour
   standardHeaders: true,
   legacyHeaders: false,
   message: {

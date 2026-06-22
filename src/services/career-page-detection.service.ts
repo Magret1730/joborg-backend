@@ -9,6 +9,9 @@ const strongUrlKeywords = [
   "bamboohr",
   "ashby",
   "icims",
+  "job-seeker",
+  "hiring",
+  "work-with-us",
 ];
 
 const strongPageKeywords = [
@@ -71,7 +74,7 @@ export function detectCareerPage(
 
   for (const keyword of weakPageKeywords) {
     if (lowerPageText.includes(keyword)) {
-      score += 1;
+      score += 2;
       matchedKeywords.push(keyword);
     }
   }
