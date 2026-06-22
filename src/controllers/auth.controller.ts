@@ -425,6 +425,7 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
     const normalizedEmail = email.trim().toLowerCase();
 
     const user = await db("users").where({ email: normalizedEmail }).first();
+    console.log("Resend verification user:", user, user.is_verified); // Log the user object
 
     // Keep response generic if user does not exist
     if (!user) {
@@ -435,6 +436,7 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
 
     if (user.is_verified) {
       return res.status(200).json({
+        // success: false,
         message: "This account is already verified. You can log in.",
       });
     }
