@@ -9,6 +9,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string("email").notNullable().unique();
     table.string("password_hash").notNullable();
     table.boolean('is_admin').defaultTo(false);
+    table.boolean("is_verified").notNullable().defaultTo(false);
     
     table.timestamps(true, true);
   });
