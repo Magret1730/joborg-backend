@@ -314,27 +314,61 @@ const forgotPassword = async (req: Request, res: Response) => {
       expiresIn: "15m",
     });
 
-    // Update the user's token in the database
-    // await db("users").where({ id: existingUser.id }).update({ token: "" });
+    const frontend_url = process.env.FRONTEND_URL;
+    if (!frontend_url) {
+      throw new Error("FRONTEND_URL is not defined in environment variables");
+    }
+
+    const verificationLink = `${frontend_url}/auth/reset-password?token=${token}`;
+
+    // Check for rate limit here (e.g., check if a reset email was sent in the last 15 minutes)
+    // Probably will need to add a new column in the users table to store the timestamp of the
+    // last password reset email sent, and check that before sending a new email.
 
     // Send the email
     const sendEmail = await sendMail({
       to: email,
       subject: "Joborg Password Reset",
       html: `
-                    <h2>Click the following link to reset your password:</h2>
-                    <h2>The link expires in 15 minutes</h2>
-                    <p>${process.env.NEXT_PUBLIC_FRONTEND_URL}/resetPassword/${token}</p>
+          <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
+            <h2 style="color: #111827;">Password Reset Request</h2>
 
-                    <p>If you did not request this, please ignore this email.</p>
-                    <p>Thank you!</p>
-                    <p>Joborg Team</p>
-                `,
+            <p>Dear ${existingUser.first_name},</p>
+
+            <p>
+              We received a request to reset your Joborg account password. Click the button below to reset it.
+            </p>
+
+            <p style="margin: 24px 0;">
+              <a
+                href="${verificationLink}"
+                style="
+                  display: inline-block;
+                  background-color: #2563eb;
+                  color: #ffffff;
+                  padding: 12px 20px;
+                  text-decoration: none;
+                  border-radius: 8px;
+                  font-weight: 600;
+                  font-size: 14px;
+                "
+              >
+                Reset Password
+              </a>
+            </p>
+
+            <p>This link expires in 15 minutes.</p>
+
+            <p>If you did not request a password reset, please ignore this email.</p>
+
+            <p>Thank you,<br />Joborg Team</p>
+           `,
     });
 
     if (sendEmail) {
       return res.status(200).json({
-        message: "Email has been sent, kindly follow the instructions",
+        success: true,
+        message: "Password Reset instructions has been sent to your email.",
       });
     } else {
       return res.status(500).json({ error: "Failed to send email" });
@@ -425,7 +459,6 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
     const normalizedEmail = email.trim().toLowerCase();
 
     const user = await db("users").where({ email: normalizedEmail }).first();
-    console.log("Resend verification user:", user, user.is_verified); // Log the user object
 
     // Keep response generic if user does not exist
     if (!user) {

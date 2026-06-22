@@ -63,7 +63,6 @@ export const postTracker = async (req: Request, res: Response) => {
 
     // Check if it's a career page
     const careerPageResult = detectCareerPage(url, cleanedHtml);
-    console.log(`Career page detection result for ${url}:`, careerPageResult);
     if (!careerPageResult.isCareerPage) {
       return res.status(400).json({
         success: false,
