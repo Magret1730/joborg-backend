@@ -19,22 +19,30 @@ console.log("gmailUser:", gmailUser);
 console.log("gmailPassword:", gmailPassword ? "********" : null);
 console.log("emailUser:", emailUser);
 
-const isSmtpReady = Boolean(gmailUser && gmailPassword);
+// const isSmtpReady = Boolean(gmailUser && gmailPassword);
 
-console.log("isSmtpReady:", isSmtpReady);
+// console.log("isSmtpReady:", isSmtpReady);
 
-const transporter = isSmtpReady
-  ? nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: true,
-      requireTLS: true,
-      auth: {
-        user: gmailUser,
-        pass: gmailPassword,
-      },
-    })
-  : null;
+// const transporter = isSmtpReady
+//   ? nodemailer.createTransport({
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  // requireTLS: true,
+  auth: {
+    user: gmailUser,
+    pass: gmailPassword,
+  },
+});
+
+try {
+  await transporter.verify();
+  console.log("Server is ready to take our messages.");
+} catch (err) {
+  console.error("Verification failed:", err);
+}
 
 export const sendMail = async ({ to, subject, html }: sendMailDto) => {
   console.log("Send Mailllllll");
@@ -53,7 +61,7 @@ export const sendMail = async ({ to, subject, html }: sendMailDto) => {
       };
     }
 
-    console.log("Transporter in send main.....")
+    console.log("Transporter in send main.....");
 
     const info = await transporter.sendMail({
       from: `"Joborg" <${emailUser}>`,
@@ -62,7 +70,9 @@ export const sendMail = async ({ to, subject, html }: sendMailDto) => {
       html,
     });
 
-    console.log(`Email sent: ${info.response} to ${to} with subject "${subject}"`);
+    console.log(
+      `Email sent: ${info.response} to ${to} with subject "${subject}"`
+    );
 
     return info;
   } catch (err) {
