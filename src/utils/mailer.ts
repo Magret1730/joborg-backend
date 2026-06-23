@@ -21,7 +21,7 @@ const transporter = isSmtpReady
   ? nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
-      secure: false,
+      secure: true,
       requireTLS: true,
       auth: {
         user: gmailUser,
@@ -31,6 +31,7 @@ const transporter = isSmtpReady
   : null;
 
 export const sendMail = async ({ to, subject, html }: sendMailDto) => {
+  console.log("Send Mailllllll");
   try {
     if (!transporter) {
       console.log("SMTP is not configured. Simulating email send:");
@@ -45,6 +46,8 @@ export const sendMail = async ({ to, subject, html }: sendMailDto) => {
         message: "Email simulated because SMTP is not configured.",
       };
     }
+
+    console.log("Transporter in send main.....")
 
     const info = await transporter.sendMail({
       from: `"Joborg" <${emailUser}>`,

@@ -479,14 +479,10 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
       throw new Error("JWT_SECRET is not defined in environment variables");
     }
 
-    console.log("jwtSecret: ", jwtSecret);
-
     const frontendUrl = process.env.FRONTEND_URL;
     if (!frontendUrl) {
       throw new Error("FRONTEND_URL is not defined in environment variables");
     }
-
-    console.log("frontendURL: ", frontendUrl);
 
     const token = jwt.sign(
       {
@@ -496,8 +492,6 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
       jwtSecret,
       { expiresIn: "15m" }
     );
-
-    console.log("Token in auth conto: ", token);
 
     const verificationLink = `${frontendUrl}/auth/verify-email?token=${token}`;
 
