@@ -460,8 +460,10 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
 
     const user = await db("users").where({ email: normalizedEmail }).first();
 
-    // Keep response generic if user does not exist
+    // Keeps response generic if user does not exist
     if (!user) {
+      console.log("No user found with email:", normalizedEmail);
+      console.log("User response: ", user);
       return res.status(200).json({
         message: "If an account exists, a verification email has been sent.",
       });
