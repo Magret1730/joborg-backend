@@ -495,7 +495,7 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
 
     const verificationLink = `${frontendUrl}/auth/verify-email?token=${token}`;
 
-    await sendMail({
+    const result = await sendMail({
       to: user.email,
       subject: "Verify your Joborg account",
       html: `
@@ -532,6 +532,8 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
           </div>
         `,
     });
+
+    console.log("Resend verification email result:", result); // REMOVE
 
     return res.status(200).json({
       message: "If an account exists, a verification email has been sent.",

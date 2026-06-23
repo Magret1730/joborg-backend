@@ -53,6 +53,8 @@ export const sendMail = async ({ to, subject, html }: sendMailDto) => {
       html,
     });
 
+    console.log(`Email sent: ${info.response} to ${to} with subject "${subject}"`);
+
     return info;
   } catch (err) {
     console.error("Error sending email:", err);
