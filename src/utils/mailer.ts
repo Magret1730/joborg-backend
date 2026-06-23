@@ -15,7 +15,13 @@ const gmailUser = process.env.GMAIL_USER;
 const gmailPassword = process.env.GMAIL_PASSWORD;
 const emailUser = process.env.EMAIL_USER || gmailUser;
 
+console.log("gmailUser:", gmailUser);
+console.log("gmailPassword:", gmailPassword ? "********" : null);
+console.log("emailUser:", emailUser);
+
 const isSmtpReady = Boolean(gmailUser && gmailPassword);
+
+console.log("isSmtpReady:", isSmtpReady);
 
 const transporter = isSmtpReady
   ? nodemailer.createTransport({
