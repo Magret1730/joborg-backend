@@ -10,6 +10,9 @@ dotenv.config({
 const resendApiKey = process.env.RESEND_API_KEY;
 const emailFrom = process.env.EMAIL_FROM;
 
+console.log("resendApiKey: ", resendApiKey ? "Configured" : "Not Configured");
+console.log("emailFrom: ", emailFrom ? emailFrom : "Not Configured emailFrom");
+
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 console.log("Resend: ", resend ? "Configured" : "Not Configured");
