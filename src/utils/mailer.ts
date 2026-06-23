@@ -1,117 +1,88 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { sendMailDto } from "../dtos/auth.dto.js";
 import dotenv from "dotenv";
 import path from "path";
-import { setDefaultResultOrder } from "node:dns";
 
 dotenv.config({
   path: path.resolve(process.cwd(), ".env"),
 });
 
-// Prefer IPv4 because Render may fail when Gmail resolves to IPv6
-setDefaultResultOrder("ipv4first");
+const resendApiKey = process.env.RESEND_API_KEY;
+const emailFrom = process.env.EMAIL_FROM;
 
-const gmailUser = process.env.GMAIL_USER;
-const gmailPassword = process.env.GMAIL_PASSWORD;
-const emailUser = process.env.EMAIL_USER || gmailUser;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
-// const isSmtpReady = Boolean(gmailUser && gmailPassword);
-
-// console.log("isSmtpReady:", isSmtpReady);
-
-// const transporter = isSmtpReady
-//   ? nodemailer.createTransport({
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  // port: 587,
-  port: 465,
-  secure: true,
-  // requireTLS: true,
-  auth: {
-    user: gmailUser,
-    pass: gmailPassword,
-  },
-});
-
-try {
-  await transporter.verify();
-  console.log("Server is ready to take our messages.");
-} catch (err) {
-  console.error("Verification failed:", err);
-}
+console.log("Resend: ", resend ? "Configured" : "Not Configured");
 
 export const sendMail = async ({ to, subject, html }: sendMailDto) => {
-  console.log("Send Mailllllll");
   try {
-    if (!transporter) {
-      console.log("SMTP is not configured. Simulating email send:");
-      console.log({
-        to,
-        subject,
-        html,
-      });
+    if (!resend || !emailFrom) {
+      console.log("Email API is not configured. Simulating email send:");
+      console.log({ to, subject, html });
 
       return {
         simulated: true,
-        message: "Email simulated because SMTP is not configured.",
+        message: "Email simulated because email API is not configured.",
       };
     }
 
-    console.log("Transporter in send main.....");
+    console.log("Sending email via Resend API...");
 
-    const info = await transporter.sendMail({
-      from: `"Joborg" <${emailUser}>`,
+    const result = await resend.emails.send({
+      from: emailFrom,
       to,
       subject,
       html,
     });
 
-    console.log(
-      `Email sent: ${info.response} to ${to} with subject "${subject}"`
-    );
+    console.log("Email sent:", result);
 
-    return info;
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    return result.data;
   } catch (err) {
     console.error("Error sending email:", err);
     throw err;
   }
 };
 
+
+
+
 // import nodemailer from "nodemailer";
 // import { sendMailDto } from "../dtos/auth.dto.js";
 // import dotenv from "dotenv";
 // import path from "path";
-// import { setDefaultResultOrder } from "node:dns";
+// // import { setDefaultResultOrder } from "node:dns";
 
 // dotenv.config({
 //   path: path.resolve(process.cwd(), ".env"),
 // });
 
 // // Prefer IPv4 because Render may fail when Gmail resolves to IPv6
-// setDefaultResultOrder("ipv4first");
+// // setDefaultResultOrder("ipv4first");
 
 // const gmailUser = process.env.GMAIL_USER;
 // const gmailPassword = process.env.GMAIL_PASSWORD;
-// const emailUser = process.env.EMAIL_USER;
-// // const nodeEnv = process.env.NODE_ENV;
+// const emailUser = process.env.EMAIL_USER || gmailUser;
 
-// const isSmtpReady = Boolean(gmailUser && gmailPassword);
-
-// // configuration for nodemailer
-// const transporter = isSmtpReady
-//   ? nodemailer.createTransport({
-//       service: "gmail",
-//       auth: {
-//         user: gmailUser,
-//         pass: gmailPassword,
-//       },
-//     })
-//   : null;
+// const transporter = nodemailer.createTransport({
+//   host: "smtp.gmail.com",
+//   // port: 587,
+//   port: 465,
+//   secure: true,
+//   // requireTLS: true,
+//   auth: {
+//     user: gmailUser,
+//     pass: gmailPassword,
+//   },
+// });
 
 // export const sendMail = async ({ to, subject, html }: sendMailDto) => {
+//   // console.log("Send Mailllllll");
 //   try {
-//     // Development fallback if SMTP is not ready
 //     if (!transporter) {
 //       console.log("SMTP is not configured. Simulating email send:");
 //       console.log({
@@ -126,6 +97,8 @@ export const sendMail = async ({ to, subject, html }: sendMailDto) => {
 //       };
 //     }
 
+//     // console.log("Transporter in send main.....");
+
 //     const info = await transporter.sendMail({
 //       from: `"Joborg" <${emailUser}>`,
 //       to,
@@ -133,9 +106,75 @@ export const sendMail = async ({ to, subject, html }: sendMailDto) => {
 //       html,
 //     });
 
+//     console.log(
+//       `Email sent: ${info.response} to ${to} with subject "${subject}"`
+//     );
+
 //     return info;
 //   } catch (err) {
 //     console.error("Error sending email:", err);
 //     throw err;
 //   }
 // };
+
+// // import nodemailer from "nodemailer";
+// // import { sendMailDto } from "../dtos/auth.dto.js";
+// // import dotenv from "dotenv";
+// // import path from "path";
+// // import { setDefaultResultOrder } from "node:dns";
+
+// // dotenv.config({
+// //   path: path.resolve(process.cwd(), ".env"),
+// // });
+
+// // // Prefer IPv4 because Render may fail when Gmail resolves to IPv6
+// // setDefaultResultOrder("ipv4first");
+
+// // const gmailUser = process.env.GMAIL_USER;
+// // const gmailPassword = process.env.GMAIL_PASSWORD;
+// // const emailUser = process.env.EMAIL_USER;
+// // // const nodeEnv = process.env.NODE_ENV;
+
+// // const isSmtpReady = Boolean(gmailUser && gmailPassword);
+
+// // // configuration for nodemailer
+// // const transporter = isSmtpReady
+// //   ? nodemailer.createTransport({
+// //       service: "gmail",
+// //       auth: {
+// //         user: gmailUser,
+// //         pass: gmailPassword,
+// //       },
+// //     })
+// //   : null;
+
+// // export const sendMail = async ({ to, subject, html }: sendMailDto) => {
+// //   try {
+// //     // Development fallback if SMTP is not ready
+// //     if (!transporter) {
+// //       console.log("SMTP is not configured. Simulating email send:");
+// //       console.log({
+// //         to,
+// //         subject,
+// //         html,
+// //       });
+
+// //       return {
+// //         simulated: true,
+// //         message: "Email simulated because SMTP is not configured.",
+// //       };
+// //     }
+
+// //     const info = await transporter.sendMail({
+// //       from: `"Joborg" <${emailUser}>`,
+// //       to,
+// //       subject,
+// //       html,
+// //     });
+
+// //     return info;
+// //   } catch (err) {
+// //     console.error("Error sending email:", err);
+// //     throw err;
+// //   }
+// // };
