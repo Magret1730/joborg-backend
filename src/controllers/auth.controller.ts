@@ -462,8 +462,6 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
 
     // Keeps response generic if user does not exist
     if (!user) {
-      console.log("No user found with email:", normalizedEmail);
-      console.log("User response: ", user);
       return res.status(200).json({
         message: "If an account exists, a verification email has been sent.",
       });
@@ -496,8 +494,6 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
     );
 
     const verificationLink = `${frontendUrl}/auth/verify-email?token=${token}`;
-
-    console.log("Verification Link: ", verificationLink);
 
     const result = await sendMail({
       to: user.email,
@@ -536,8 +532,6 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
           </div>
         `,
     });
-
-    console.log("Resend verification email result:", result); // REMOVE
 
     return res.status(200).json({
       message: "If an account exists, a verification email has been sent.",

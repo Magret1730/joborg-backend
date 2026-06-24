@@ -10,18 +10,13 @@ dotenv.config({
 const resendApiKey = process.env.RESEND_API_KEY;
 const emailFrom = process.env.EMAIL_FROM;
 
-console.log("resendApiKey: ", resendApiKey ? "Configured" : "Not Configured");
-console.log("emailFrom: ", emailFrom ? emailFrom : "Not Configured emailFrom");
-
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
-
-console.log("Resend: ", resend ? "Configured" : "Not Configured");
 
 export const sendMail = async ({ to, subject, html }: sendMailDto) => {
   try {
     if (!resend || !emailFrom) {
       console.log("Email API is not configured. Simulating email send:");
-      console.log({ to, subject, html });
+      // console.log({ to, subject, html });
 
       return {
         simulated: true,
@@ -29,16 +24,12 @@ export const sendMail = async ({ to, subject, html }: sendMailDto) => {
       };
     }
 
-    console.log("Sending email via Resend API...");
-
     const result = await resend.emails.send({
       from: emailFrom,
       to,
       subject,
       html,
     });
-
-    console.log("Email sent:", result);
 
     if (result.error) {
       throw new Error(result.error.message);
@@ -84,7 +75,6 @@ export const sendMail = async ({ to, subject, html }: sendMailDto) => {
 // });
 
 // export const sendMail = async ({ to, subject, html }: sendMailDto) => {
-//   // console.log("Send Mailllllll");
 //   try {
 //     if (!transporter) {
 //       console.log("SMTP is not configured. Simulating email send:");
@@ -100,18 +90,12 @@ export const sendMail = async ({ to, subject, html }: sendMailDto) => {
 //       };
 //     }
 
-//     // console.log("Transporter in send main.....");
-
 //     const info = await transporter.sendMail({
 //       from: `"Joborg" <${emailUser}>`,
 //       to,
 //       subject,
 //       html,
 //     });
-
-//     console.log(
-//       `Email sent: ${info.response} to ${to} with subject "${subject}"`
-//     );
 
 //     return info;
 //   } catch (err) {
