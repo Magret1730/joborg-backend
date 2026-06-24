@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+// BREVO
 import { sendMailDto } from "../dtos/auth.dto.js";
 import dotenv from "dotenv";
 import path from "path";
@@ -7,35 +7,57 @@ dotenv.config({
   path: path.resolve(process.cwd(), ".env"),
 });
 
-const resendApiKey = process.env.RESEND_API_KEY;
-const emailFrom = process.env.EMAIL_FROM;
-
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
+const brevoApiKey = process.env.BREVO_API_KEY;
+const emailFromName = process.env.EMAIL_FROM_NAME || "Joborg";
+const emailFromEmail = process.env.EMAIL_FROM_EMAIL;
 
 export const sendMail = async ({ to, subject, html }: sendMailDto) => {
   try {
-    if (!resend || !emailFrom) {
-      console.log("Email API is not configured. Simulating email send:");
-      // console.log({ to, subject, html });
+    if (!brevoApiKey || !emailFromEmail) {
+      console.log("Brevo is not configured. Simulating email send:");
+      console.log({
+        to,
+        subject,
+        html,
+      });
 
       return {
         simulated: true,
-        message: "Email simulated because email API is not configured.",
+        message: "Email simulated because Brevo is not configured.",
       };
     }
 
-    const result = await resend.emails.send({
-      from: emailFrom,
-      to,
-      subject,
-      html,
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": brevoApiKey,
+      },
+      body: JSON.stringify({
+        sender: {
+          name: emailFromName,
+          email: emailFromEmail,
+        },
+        to: [
+          {
+            email: to,
+          },
+        ],
+        subject,
+        htmlContent: html,
+      }),
     });
 
-    if (result.error) {
-      throw new Error(result.error.message);
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Brevo email error:", data);
+      throw new Error(data.message || "Failed to send email with Brevo.");
     }
 
-    return result.data;
+    console.log(`Email sent to ${to} with subject "${subject}"`);
+
+    return data;
   } catch (err) {
     console.error("Error sending email:", err);
     throw err;
@@ -43,8 +65,54 @@ export const sendMail = async ({ to, subject, html }: sendMailDto) => {
 };
 
 
+// RESEND
+// import { Resend } from "resend";
+// import { sendMailDto } from "../dtos/auth.dto.js";
+// import dotenv from "dotenv";
+// import path from "path";
+
+// dotenv.config({
+//   path: path.resolve(process.cwd(), ".env"),
+// });
+
+// const resendApiKey = process.env.RESEND_API_KEY;
+// const emailFrom = process.env.EMAIL_FROM;
+
+// const resend = resendApiKey ? new Resend(resendApiKey) : null;
+
+// export const sendMail = async ({ to, subject, html }: sendMailDto) => {
+//   try {
+//     if (!resend || !emailFrom) {
+//       console.log("Email API is not configured. Simulating email send:");
+//       // console.log({ to, subject, html });
+
+//       return {
+//         simulated: true,
+//         message: "Email simulated because email API is not configured.",
+//       };
+//     }
+
+//     const result = await resend.emails.send({
+//       from: emailFrom,
+//       to,
+//       subject,
+//       html,
+//     });
+
+//     if (result.error) {
+//       throw new Error(result.error.message);
+//     }
+
+//     return result.data;
+//   } catch (err) {
+//     console.error("Error sending email:", err);
+//     throw err;
+//   }
+// };
 
 
+
+// NODEMAILER
 // import nodemailer from "nodemailer";
 // import { sendMailDto } from "../dtos/auth.dto.js";
 // import dotenv from "dotenv";
