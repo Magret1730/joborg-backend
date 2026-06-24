@@ -460,7 +460,7 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
 
     const user = await db("users").where({ email: normalizedEmail }).first();
 
-    // Keep response generic if user does not exist
+    // Keeps response generic if user does not exist
     if (!user) {
       return res.status(200).json({
         message: "If an account exists, a verification email has been sent.",
@@ -495,7 +495,7 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
 
     const verificationLink = `${frontendUrl}/auth/verify-email?token=${token}`;
 
-    await sendMail({
+    const result = await sendMail({
       to: user.email,
       subject: "Verify your Joborg account",
       html: `
@@ -534,6 +534,7 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
     });
 
     return res.status(200).json({
+      success: true,
       message: "If an account exists, a verification email has been sent.",
     });
   } catch (error) {
