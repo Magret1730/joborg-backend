@@ -534,6 +534,7 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
     });
 
     return res.status(200).json({
+      success: true,
       message: "If an account exists, a verification email has been sent.",
     });
   } catch (error) {
