@@ -7,7 +7,6 @@ const router = express.Router();
 
 router.route("/").post(authorization, manualTrackerCheckLimiter, trackerController.postTracker);
 router.route("/").get(authorization, trackerController.getTrackers);
-router.route("/check-now").get(authorization, manualTrackerCheckLimiter, trackerController.checkNowAllTrackers);
 router.route("/:id").get(authorization, trackerController.getTracker);
 router.route("/:id").put(authorization, trackerController.updateTracker);
 router.route("/:id").delete(authorization, trackerController.deleteTracker);
