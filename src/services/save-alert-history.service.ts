@@ -18,6 +18,7 @@ export const saveAlertHistory = async ({
       tracker_id: trackerId,
       change_log_id: changeLogId,
       recipient: recipient,
+      sent_at: new Date(), // when joborg sent the alert
       // recipient_email: recipient,
       message,
       channel,

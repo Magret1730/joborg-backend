@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import db from "../db/connection.js";
 
-export const alerts = async (req: Request, res: Response) => {
+export const getAlerts = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
 
@@ -31,7 +31,7 @@ export const alerts = async (req: Request, res: Response) => {
         "trackers.label",
         "trackers.url",
 
-        "change_logs.detected_at"
+        "change_logs.detected_at" // when Joborg found the change
       )
       .orderBy("alert_history.created_at", "desc");
 
