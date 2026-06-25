@@ -20,10 +20,35 @@ import {
 export const postTracker = async (req: Request, res: Response) => {
   try {
     const { url, label, company_name, scraper_type } = req.body;
-    if (!url) {
+    const trimmedUrl = url?.trim();
+    const trimmedCompanyName = company_name?.trim();
+    const trimmedLabel = label?.trim();
+
+    if (!trimmedUrl) {
       return res.status(400).json({
         success: false,
         message: "URL is required",
+      });
+    }
+
+    if (!trimmedCompanyName) {
+      return res.status(400).json({
+        success: false,
+        message: "Company name is required",
+      });
+    }
+
+    if (trimmedCompanyName.length > 80) {
+      return res.status(400).json({
+        success: false,
+        message: "Company name must be less than 80 characters.",
+      });
+    }
+
+    if (trimmedLabel && trimmedLabel.length > 150) {
+      return res.status(400).json({
+        success: false,
+        message: "Label must be less than 150 characters.",
       });
     }
 
@@ -415,94 +440,3 @@ export const checkNowTrackerByID = async (req: Request, res: Response) => {
     });
   }
 };
-
-// Will not implement this in frontend
-export const checkNowAllTrackers = async (req: Request, res: Response) => {
-  const result = await checkAllActiveTrackers();
-
-  return res.status(200).json(result);
-  // try{
-  //   // Get all active trackers
-  //   const trackers = await db("trackers")
-  //     .join("users", "trackers.user_id", "users.id")
-  //     .where("trackers.status", "ACTIVE")
-  //     .select(
-  //       "trackers.id",
-  //       "trackers.company_name",
-  //       "trackers.label",
-  //       "trackers.url",
-  //       "trackers.status",
-  //       "users.email as user_email"
-  //     );
-
-  //   if (trackers.length === 0) {
-  //     res.status(200).json({
-  //       success: true,
-  //       message: "No active trackers",
-  //     });
-  //   }
-
-  //   const results = [];
-
-  //   for (const tracker of trackers ) {
-  //     try {
-  //       // Tracker check service
-  //       const checkResult = await checkTrackerForChanges(tracker.id);
-  //       if (!checkResult.success) {
-  //         results.push({
-  //           trackerId: tracker.id,
-  //           companyName: tracker.company_name,
-  //           success: false,
-  //           changed: false,
-  //           message: checkResult.message,
-  //         });
-
-  //         continue;
-  //       }
-
-  //       // If changed, send email notification
-  //       if (checkResult.changed) {
-  //         await sendMail({
-  //           to: req.user.email,
-  //           subject: `Change detected on ${tracker.company_name} Careers page`,
-  //           html: await trackerChangeEmailTemplate(tracker),
-  //         });
-  //       }
-
-  //       results.push({
-  //         trackerId: tracker.id,
-  //         companyName: tracker.company_name,
-  //         success: true,
-  //         changed: checkResult.changed,
-  //         message: checkResult.message,
-  //         data: checkResult,
-  //       });
-  //     } catch (trackerError) {
-  //       console.error(`Error checking tracker ${tracker.id}:`, trackerError);
-
-  //       results.push({
-  //         trackerId: tracker.id,
-  //         companyName: tracker.company_name,
-  //         success: false,
-  //         changed: false,
-  //         message: "Failed to check this tracker.",
-  //       });
-
-  //       continue;
-  //     }
-  //   }
-
-  //   return res.status(200).json({
-  //     success: true,
-  //     message: "All active trackers checked.",
-  //     checked: results.length,
-  //     data: results,
-  //   });
-  // } catch (error) {
-  //   console.error("Error checking all trackers:", error);
-  //   res.status(500).json({
-  //     success: false,
-  //     message: "Server error while checking all trackers",
-  //   });
-  // }
-}
