@@ -4,6 +4,8 @@ import { authorization } from '../middlewares/authorization.js';
 
 const router = express.Router();
 
-router.route("/").post(authorization, alertsController.alerts);
+router.route("/").get(authorization, alertsController.getAlerts);
+// router.route("/:id").get(authorization, alertsController.alert);
+
 
 export default router;
