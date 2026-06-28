@@ -42,6 +42,7 @@ export const changes = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success: true,
+      message: "Change logs fetched successfully.",
       data: changeLogs,
     });
   } catch (error) {
@@ -50,6 +51,7 @@ export const changes = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: "An error occurred while fetching change logs.",
+      data: [],
     });
   }
 };
@@ -57,18 +59,27 @@ export const changes = async (req: Request, res: Response) => {
 export const changeById = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    const changeLogId = req.params.id;
+    const { trackerId } = req.params;
 
     if (!userId) {
       return res.status(401).json({
         success: false,
         message: "Unauthorized.",
+        data: [],
+      });
+    }
+
+    if (!trackerId) {
+      return res.status(400).json({
+        success: false,
+        message: "Tracker ID is required.",
+        data: [],
       });
     }
 
     const changeLog = await db("change_logs")
       .join("trackers", "change_logs.tracker_id", "trackers.id")
-      .where("change_logs.id", changeLogId)
+      .where("change_logs.tracker_id", trackerId)
       .andWhere("trackers.user_id", userId)
       .select(
         "change_logs.id",
@@ -85,17 +96,19 @@ export const changeById = async (req: Request, res: Response) => {
         "trackers.url",
         "trackers.status"
       )
-      .first();
+      .orderBy("change_logs.detected_at", "desc");
 
     if (!changeLog) {
       return res.status(404).json({
         success: false,
         message: "Change log not found.",
+        data: [],
       });
     }
 
     return res.status(200).json({
       success: true,
+      message: "Tracker changes fetched successfully.",
       data: changeLog,
     });
   } catch (error) {
@@ -104,6 +117,7 @@ export const changeById = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: "An error occurred while fetching the change log.",
+      data: [],
     });
   }
 };

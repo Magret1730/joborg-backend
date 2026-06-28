@@ -36,7 +36,7 @@ app.use("/", express.static("public/images"));
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/trackers", trackerRoutes);
-app.use("/api/v1/change-logs", changeLogsRoutes);
+app.use("/api/v1/changes", changeLogsRoutes);
 app.use("/api/v1/alerts", alertsRoutes);
 
 app.get("/", (req: Request, res: Response) => {
