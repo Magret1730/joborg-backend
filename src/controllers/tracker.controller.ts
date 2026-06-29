@@ -61,6 +61,17 @@ export const postTracker = async (req: Request, res: Response) => {
       });
     }
 
+    // Check if the tracker already exists for this user
+    const existingTracker = await db("trackers")
+      .where({ user_id: req.user.id, url: trimmedUrl })
+      .first();
+    if (existingTracker) {
+      return res.status(400).json({
+        success: false,
+        message: "Tracker for this URL already exists.",
+      });
+    }
+
     // Default to AUTO unless the frontend sends STATIC or BROWSER
     const requestedScraperType: ScraperType =
       scraper_type && Object.values(SCRAPER_TYPE).includes(scraper_type)

@@ -10,6 +10,9 @@ const allowedOrigins = ["http://localhost:3000", "https://joborg-frontend.vercel
 
 const app = express();
 
+// Trust the first proxy in front of my Express app.
+app.set("trust proxy", 1);
+
 app.use(
   cors({
     origin: (
