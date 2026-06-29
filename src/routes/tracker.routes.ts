@@ -2,10 +2,11 @@ import express from 'express';
 import * as trackerController from '../controllers/tracker.controller.js';
 import { authorization } from '../middlewares/authorization.js';
 import { manualTrackerCheckLimiter } from '../middlewares/manual-rate-limit.middleware.js';
+import { createTrackerLimiter }from '../middlewares/create-tracker-rate-limit.middleware.js';
 
 const router = express.Router();
 
-router.route("/").post(authorization, manualTrackerCheckLimiter, trackerController.postTracker);
+router.route("/").post(authorization, createTrackerLimiter, trackerController.postTracker);
 router.route("/").get(authorization, trackerController.getTrackers);
 router.route("/:id").get(authorization, trackerController.getTracker);
 router.route("/:id").put(authorization, trackerController.updateTracker);
