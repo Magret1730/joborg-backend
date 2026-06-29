@@ -2,7 +2,7 @@ import cron from "node-cron";
 import { checkAllActiveTrackers } from "./check-all-active-trackers.js";
 
 const TRACKER_CHECK_SCHEDULE = "0 10,14,19 * * *"; // At hour 10am, 2pm and 7pm // minute hour day-of-month month day-of-week
-const TRACKER_CHECK_SCHEDULE_EVENING = "15 00 * * *"; // At 10:01pm // Testing Purpose
+const TRACKER_CHECK_SCHEDULE_EVENING = "37 00 * * *"; // At 10:01pm // Testing Purpose
 
 export const startScheduler = () => {
   const schedulerEnabled = process.env.ENABLE_SCHEDULER === "true";
@@ -16,10 +16,16 @@ export const startScheduler = () => {
 
   cron.schedule(TRACKER_CHECK_SCHEDULE, async () => {
     await checkAllActiveTrackers();
+  },
+  {
+    timezone: "America/St_Johns",
   });
 
   cron.schedule(TRACKER_CHECK_SCHEDULE_EVENING, async () => { // Need to comment out
     await checkAllActiveTrackers();
+  },
+  {
+    timezone: "America/St_Johns",
   });
 
   console.log("Active trackers cron job registered.");
