@@ -124,8 +124,10 @@ export const postTracker = async (req: Request, res: Response) => {
         "last_hash",
         "last_checked_at",
         "last_changed_at",
+        "created_at",
         "scraper_type",
-      ]);
+      ])
+      .orderBy("created_at", "desc");
     if (!result || result.length === 0) {
       return res.status(500).json({
         success: false,
@@ -135,6 +137,7 @@ export const postTracker = async (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
+      message: "Tracker created successfully.",
       data: result[0],
     });
   } catch (error) {
@@ -159,8 +162,10 @@ export const getTrackers = async (req: Request, res: Response) => {
         "last_hash",
         "last_checked_at",
         "last_changed_at",
-        "scraper_type"
-      );
+        "scraper_type",
+        "created_at"
+      )
+      .orderBy("created_at", "desc");
 
     if (!trackers) {
       return res.status(404).json({
@@ -204,8 +209,10 @@ export const getTracker = async (req: Request, res: Response) => {
         "last_hash",
         "last_checked_at",
         "last_changed_at",
-        "scraper_type"
-      );
+        "scraper_type",
+        "created_at"
+      )
+      .orderBy("created_at", "desc");
 
     if (!tracker) {
       return res.status(404).json({
