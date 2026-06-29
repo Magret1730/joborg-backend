@@ -5,7 +5,6 @@ import { authorization } from '../middlewares/authorization.js';
 const router = express.Router();
 
 router.route("/").get(authorization, alertsController.getAlerts);
-// router.route("/:id").get(authorization, alertsController.alert);
-
+router.get("/tracker/:trackerId", authorization, alertsController.getAlertsByTracker);
 
 export default router;
