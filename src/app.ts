@@ -5,6 +5,7 @@ import userRoutes from "./routes/user.routes.js";
 import trackerRoutes from "./routes/tracker.routes.js";
 import changeLogsRoutes from "./routes/change-logs.routes.js";
 import alertsRoutes from "./routes/alerts.routes.js";
+import cronJobRoutes from "./routes/cron-jobs.routes.js";
 
 const allowedOrigins = ["http://localhost:3000", "https://joborg-frontend.vercel.app"];
 
@@ -41,6 +42,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/trackers", trackerRoutes);
 app.use("/api/v1/changes", changeLogsRoutes);
 app.use("/api/v1/alerts", alertsRoutes);
+app.use("/api/v1/cron-jobs", cronJobRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Joborg backend API is running");
