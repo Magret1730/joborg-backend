@@ -4,8 +4,7 @@ import { checkAllActiveTrackers } from "./check-all-active-trackers.js";
 const TRACKER_CHECK_SCHEDULE = "0 10,14,18 * * *"; // At hour 10am, 2pm and 7pm // minute hour day-of-month month day-of-week
 // const TRACKER_CHECK_SCHEDULE_EVENING = "40 15 * * *"; // At 10:01pm // Testing Purpose
 
-// The app depends on cron-job.service.ts to start the cron job now.
-export const startScheduler = () => {
+export const startCronJob = async () => {
   const schedulerEnabled = process.env.ENABLE_SCHEDULER === "true";
 
   if (!schedulerEnabled) {
@@ -22,12 +21,12 @@ export const startScheduler = () => {
     timezone: "America/St_Johns",
   });
 
-  // cron.schedule(TRACKER_CHECK_SCHEDULE_EVENING, async () => { // Need to comment out
-  //   await checkAllActiveTrackers();
-  // },
-  // {
-  //   timezone: "America/St_Johns",
-  // });
+//   cron.schedule(TRACKER_CHECK_SCHEDULE_EVENING, async () => { // Need to comment out
+//     await checkAllActiveTrackers();
+//   },
+//   {
+//     timezone: "America/St_Johns",
+//   });
 
   console.log("Active trackers cron job registered.");
 };
