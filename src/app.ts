@@ -48,10 +48,11 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Joborg backend API is running");
 });
 
-app.get("/api/health", (req: Request, res: Response) => {
+app.get("/api/v1/health", (req: Request, res: Response) => {
   res.json({
     success: true,
-    message: "Server is healthy",
+    message: "Server is healthy. Joborg backend is awake.",
+    time: new Date().toISOString(),
   });
 });
 
