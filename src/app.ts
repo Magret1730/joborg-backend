@@ -48,12 +48,14 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Joborg backend API is running");
 });
 
+// Wake up render backend
 app.get("/api/v1/health", (req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: "Server is healthy. Joborg backend is awake.",
-    time: new Date().toISOString(),
-  });
+  // res.json({
+  //   success: true,
+  //   message: "Server is healthy. Joborg backend is awake.",
+  //   time: new Date().toISOString(),
+  // });
+  res.status(200).send("Joborg backend is awake.");
 });
 
 export default app;
