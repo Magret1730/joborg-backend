@@ -6,6 +6,7 @@ import trackerRoutes from "./routes/tracker.routes.js";
 import changeLogsRoutes from "./routes/change-logs.routes.js";
 import alertsRoutes from "./routes/alerts.routes.js";
 import cronJobRoutes from "./routes/cron-jobs.routes.js";
+import publicRoutes from "./routes/public.routes.js";
 
 const allowedOrigins = ["http://localhost:3000", "https://joborg-frontend.vercel.app"];
 
@@ -43,6 +44,7 @@ app.use("/api/v1/trackers", trackerRoutes);
 app.use("/api/v1/changes", changeLogsRoutes);
 app.use("/api/v1/alerts", alertsRoutes);
 app.use("/api/v1/cron-jobs", cronJobRoutes);
+app.use("/api/v1/public", publicRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Joborg backend API is running");
@@ -55,7 +57,7 @@ app.get("/api/v1/health", (req: Request, res: Response) => {
   //   message: "Server is healthy. Joborg backend is awake.",
   //   time: new Date().toISOString(),
   // });
-  res.status(200).send("Joborg backend is awake.");
+  res.status(200).send("Ok");
 });
 
 export default app;
