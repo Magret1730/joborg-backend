@@ -12,10 +12,6 @@ export const contactMail = async (payload: ContactRequestDto) => {
       html: await ContactEmailTemplate(payload),
     });
 
-    console.log(
-      `Contact email sent to ${process.env.EMAIL_FROM_EMAIL} with subject "${subject}"`
-    );
-
     return data;
   } catch (err) {
     console.error("Error sending contact email:", err);
