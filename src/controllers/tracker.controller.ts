@@ -245,36 +245,91 @@ export const getTracker = async (req: Request, res: Response) => {
   }
 };
 
+// export const deleteTracker = async (req: Request, res: Response) => {
+//   try {
+//     const { id } = req.params;
+//     if (!id) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Tracker ID is required.",
+//       });
+//     }
+
+//     const deleted = await db("trackers")
+//       .where({ id, user_id: req.user.id })
+//       .del();
+
+//     if (deleted === 0) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Tracker not found or not owned by user.",
+//       });
+//     }
+
+//     res.json({
+//       success: true,
+//       message: "Tracker deleted successfully.",
+//     });
+//   } catch (error) {
+//     console.error("Error deleting tracker:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Server error while deleting tracker",
+//     });
+//   }
+// };
+
 export const deleteTracker = async (req: Request, res: Response) => {
   try {
+    const userId = req.user?.id;
     const { id } = req.params;
-    if (!id) {
-      return res.status(400).json({
+
+    if (!userId) {
+      return res.status(401).json({
         success: false,
-        message: "Tracker ID is required.",
+        message: "Unauthorized.",
       });
     }
 
-    const deleted = await db("trackers")
-      .where({ id, user_id: req.user.id })
-      .del();
+    const tracker = await db("trackers")
+      .where({ id, user_id: userId })
+      .first();
 
-    if (deleted === 0) {
+    if (!tracker) {
       return res.status(404).json({
         success: false,
-        message: "Tracker not found or not owned by user.",
+        message: "Tracker not found.",
       });
     }
 
-    res.json({
+    // A transaction makes sure they either all succeed or all fail together.
+    await db.transaction(async (trx) => {
+      // Delete alerts first because alerts references tracker/change_logs
+      await trx("alert_history")
+        .where({ tracker_id: id })
+        .del();
+
+      // Delete change logs linked to this tracker
+      await trx("change_logs")
+        .where({ tracker_id: id })
+        .del();
+
+      // Delete tracker last
+      await trx("trackers")
+        .where({ id, user_id: userId })
+        .del();
+    });
+
+    return res.status(200).json({
       success: true,
-      message: "Tracker deleted successfully.",
+      message: "Tracker and its related change logs and alert history deleted successfully.",
     });
   } catch (error) {
     console.error("Error deleting tracker:", error);
-    res.status(500).json({
+
+    return res.status(500).json({
       success: false,
-      message: "Server error while deleting tracker",
+      message: "Failed to delete tracker.",
     });
   }
 };

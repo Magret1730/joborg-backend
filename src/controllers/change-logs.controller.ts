@@ -121,3 +121,60 @@ export const changeById = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getChangesByTracker = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { trackerId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized.",
+        data: [],
+      });
+    }
+
+    if (!trackerId) {
+      return res.status(400).json({
+        success: false,
+        message: "Tracker ID is required.",
+        data: [],
+      });
+    }
+
+    const changeLogs = await db("change_logs")
+      .join("trackers", "change_logs.tracker_id", "trackers.id")
+      .where("trackers.user_id", userId)
+      .andWhere("change_logs.tracker_id", trackerId)
+      .select(
+        "change_logs.id",
+        "change_logs.tracker_id",
+        "change_logs.old_hash",
+        "change_logs.new_hash",
+        "change_logs.detected_at",
+        "change_logs.notification_sent",
+        "change_logs.created_at",
+        "change_logs.updated_at",
+        "trackers.company_name",
+        "trackers.label",
+        "trackers.url",
+        "trackers.status"
+      )
+      .orderBy("change_logs.created_at", "desc");
+
+    return res.status(200).json({
+      success: true,
+      message: "Tracker changes fetched successfully.",
+      data: changeLogs,
+    });
+  } catch (error) {
+    console.error("Error fetching tracker changes:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch tracker changes.",
+      data: [],
+    });
+  }
+};

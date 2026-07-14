@@ -28,7 +28,7 @@ export const contactEmail = async (req: Request, res: Response) => {
     });
 
     return res.status(200).json({
-      message: "Contact email sent successfully",
+      message: "Message sent successfully",
       data,
     });
   } catch (error) {
