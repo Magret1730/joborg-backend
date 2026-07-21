@@ -62,8 +62,6 @@ export const changeById = async (req: Request, res: Response) => {
     const userId = req.user?.id;
     const { trackerId } = req.params;
 
-    console.log(`Fetching change log for tracker ID: ${trackerId} and user ID: ${userId}`);
-
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -109,8 +107,6 @@ export const changeById = async (req: Request, res: Response) => {
         data: [],
       });
     }
-
-    console.log(`Fetched change log for tracker ID ${trackerId}:`, changeLog);
 
     return res.status(200).json({
       success: true,
