@@ -56,10 +56,13 @@ export const changes = async (req: Request, res: Response) => {
   }
 };
 
+// Get change log by tracker ID for the authenticated user
 export const changeById = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     const { trackerId } = req.params;
+
+    console.log(`Fetching change log for tracker ID: ${trackerId} and user ID: ${userId}`);
 
     if (!userId) {
       return res.status(401).json({
@@ -96,7 +99,8 @@ export const changeById = async (req: Request, res: Response) => {
         "trackers.url",
         "trackers.status"
       )
-      .orderBy("change_logs.detected_at", "desc");
+      .orderBy("change_logs.detected_at", "desc")
+      .first();
 
     if (!changeLog) {
       return res.status(404).json({
@@ -105,6 +109,8 @@ export const changeById = async (req: Request, res: Response) => {
         data: [],
       });
     }
+
+    console.log(`Fetched change log for tracker ID ${trackerId}:`, changeLog);
 
     return res.status(200).json({
       success: true,
@@ -122,6 +128,7 @@ export const changeById = async (req: Request, res: Response) => {
   }
 };
 
+// Get changes of a tracker by tracker ID for the authenticated user
 export const getChangesByTracker = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
