@@ -1,6 +1,7 @@
 import db from "../db/connection.js";
 import type { Request, Response } from "express";
 
+// Get all change logs for the authenticated user
 export const changes = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -56,6 +57,7 @@ export const changes = async (req: Request, res: Response) => {
   }
 };
 
+// Get change log by tracker ID
 export const changeById = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -121,3 +123,71 @@ export const changeById = async (req: Request, res: Response) => {
     });
   }
 };
+
+// Get all changes by tracker
+export const changesByTracker = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { trackerId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized.",
+        data: [],
+      });
+    }
+
+    if (!trackerId) {
+      return res.status(400).json({
+        success: false,
+        message: "Tracker ID is required.",
+        data: [],
+      });
+    }
+
+    const changeLogs = await db("change_logs")
+      .join("trackers", "change_logs.tracker_id", "trackers.id")
+      .where("change_logs.tracker_id", trackerId)
+      .andWhere("trackers.user_id", userId)
+      .select(
+        "change_logs.id",
+        "change_logs.tracker_id",
+        "change_logs.old_hash",
+        "change_logs.new_hash",
+        "change_logs.detected_at",
+        "change_logs.notification_sent",
+        "change_logs.created_at",
+        "change_logs.updated_at",
+
+        "trackers.company_name",
+        "trackers.label",
+        "trackers.url",
+        "trackers.status"
+      )
+      .orderBy("change_logs.detected_at", "desc");
+
+    if (changeLogs.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: [],
+        message: "No change logs found for the specified tracker.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Change logs fetched successfully for the specified tracker.",
+      data: changeLogs,
+    });
+  } catch (error) {
+    console.error("Error fetching change logs by tracker:", error);
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "An error occurred while fetching change logs for the specified tracker.",
+      data: [],
+    });
+  }
+}
