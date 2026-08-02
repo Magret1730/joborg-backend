@@ -28,46 +28,86 @@ import type { Request, Response } from "express";
 
 // Finds a user by their ID and returns their information, excluding the password field
 const me = async (req: Request, res: Response) => {
-    try {
-        // gets id to make the request
-        const { id } = req.params;
+  try {
+    // gets id to make the request
+    const { id } = req.params;
 
-        // checks for invalid id
-        if (!id) {
-            return res.status(400).json({
-                success: false,
-                message: "User ID is required",
-            });
-        }
-
-        // queries database
-        const user = await db("users")
-            .where({ id })
-            .first();
-
-        // Checks if user is found
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found",
-            });
-        }
-
-        // Removes the password field from the responsee
-        const { password_hash, ...userData } = user;
-
-         // sends a response with the appropriate status code
-        res.json({ success: true, data: userData });
-    } catch (error) {
-        // Logs the error for debugging
-        console.error(error);
-
-        // Sends appropriate response to frontend
-        res.status(500).json({
-            success: false,
-            message: "Internal server error",
-        });
+    // checks for invalid id
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
     }
+
+    // queries database
+    const user = await db("users").where({ id }).first();
+
+    // Checks if user is found
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Removes the password field from the responsee
+    const { password_hash, ...userData } = user;
+
+    // sends a response with the appropriate status code
+    res.json({ success: true, data: userData });
+  } catch (error) {
+    // Logs the error for debugging
+    console.error(error);
+
+    // Sends appropriate response to frontend
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+// Updates a user's information based on their ID and the provided data in the request body
+const updateUser = async (req: Request, res: Response) => {
+  try {
+    // gets id to make the request
+    const { id } = req.params;
+
+    // checks for invalid id
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    // queries database
+    const user = await db("users").where({ id }).first();
+
+    // Checks if user is found
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // updates user information
+    await db("users").where({ id }).update(req.body);
+
+    // sends a response with the appropriate status code
+    res.json({ success: true, message: "User updated successfully" });
+  } catch (error) {
+    // Logs the error for debugging
+    console.error(error);
+
+    // Sends appropriate response to frontend
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
 };
 
 export { me };
