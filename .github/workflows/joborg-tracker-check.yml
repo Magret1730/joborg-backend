@@ -2,8 +2,7 @@ name: Joborg Tracker Check
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
-      timezone: "America/St_Johns"
+    - cron: "2-57/5 * * * *"
 
   workflow_dispatch:
 
