@@ -1,0 +1,52 @@
+name: Joborg Tracker Check
+
+on:
+  schedule:
+    # 10:00 AM NST/NDT-ish is tricky because Newfoundland has a half-hour offset.
+    # These UTC times match 10 AM, 2 PM, 6 PM during Newfoundland Daylight Time.
+    - cron: "35 10,14,18,22 * * *"
+
+  workflow_dispatch:
+
+jobs:
+  trigger-tracker-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Wake backend
+        run: |
+          for i in 1 2 3 4 5; do
+            echo "Wake attempt $i"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://joborg-backend.onrender.com/api/v1/health")
+            echo "Health status: $STATUS"
+
+            if [ "$STATUS" = "200" ]; then
+              echo "Backend is awake"
+              break
+            fi
+
+            sleep 30
+          done
+
+      - name: Run tracker check
+        run: |
+          for i in 1 2 3 4 5; do
+            echo "Tracker check attempt $i"
+
+            STATUS=$(curl -s -o response.txt -w "%{http_code}" \
+              -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+              "https://joborg-backend.onrender.com/api/v1/cron-jobs")
+
+            echo "Status: $STATUS"
+            cat response.txt || true
+
+            if [ "$STATUS" = "200" ] || [ "$STATUS" = "202" ]; then
+              echo "Tracker check started successfully"
+              exit 0
+            fi
+
+            sleep 30
+          done
+
+          echo "Tracker check failed after retries"
+          exit 1
