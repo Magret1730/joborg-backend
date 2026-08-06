@@ -2,9 +2,8 @@ name: Joborg Tracker Check
 
 on:
   schedule:
-    # 10:00 AM NST/NDT-ish is tricky because Newfoundland has a half-hour offset.
-    # These UTC times match 10 AM, 2 PM, 6 PM during Newfoundland Daylight Time.
-    - cron: "35 1,13,17,21 * * *"
+    - cron: "20 10,14,18,23 * * *"
+      timezone: "America/St_Johns"
 
   workflow_dispatch:
 
