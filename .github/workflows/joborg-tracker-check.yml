@@ -4,7 +4,7 @@ on:
   schedule:
     # 10:00 AM NST/NDT-ish is tricky because Newfoundland has a half-hour offset.
     # These UTC times match 10 AM, 2 PM, 6 PM during Newfoundland Daylight Time.
-    - cron: "35 10,14,18,22 * * *"
+    - cron: "25 1,13,17,21 * * *"
 
   workflow_dispatch:
 
