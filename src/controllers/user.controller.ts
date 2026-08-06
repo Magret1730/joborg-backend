@@ -110,4 +110,4 @@ const updateUser = async (req: Request, res: Response) => {
   }
 };
 
-export { me };
+export { me, updateUser };
