@@ -94,10 +94,24 @@ const updateUser = async (req: Request, res: Response) => {
     }
 
     // updates user information
-    await db("users").where({ id }).update(req.body);
+    const response = await db("users").where({ id }).update(req.body).returning("*");
+
+    const updatedUser = response[0];
+    const {first_name, last_name, email, is_admin} = updatedUser;
 
     // sends a response with the appropriate status code
-    res.json({ success: true, message: "User updated successfully" });
+    res.json({
+      success: true,
+      message: "User updated successfully",
+      data: {
+        user: {
+          first_name: first_name,
+          last_name: last_name,
+          email: email,
+          is_admin: is_admin,
+        }
+      },
+    });
   } catch (error) {
     // Logs the error for debugging
     console.error(error);
