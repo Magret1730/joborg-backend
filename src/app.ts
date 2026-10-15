@@ -47,7 +47,7 @@ app.use("/api/v1/cron-jobs", cronJobRoutes);
 app.use("/api/v1/public", publicRoutes);
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Joborg backend API is running");
+  res.send("Joborg backend API is running\n");
 });
 
 // Wake up render backend
@@ -57,7 +57,7 @@ app.get("/api/v1/health", (req: Request, res: Response) => {
   //   message: "Server is healthy. Joborg backend is awake.",
   //   time: new Date().toISOString(),
   // });
-  res.status(200).send("Ok");
+  res.status(200).send("Ok\n");
 });
 
 export default app;
